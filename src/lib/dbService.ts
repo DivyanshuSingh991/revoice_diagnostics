@@ -116,7 +116,7 @@ export async function saveDiagnosticAssessment(report: DiagnosticReport) {
  *    Opt-in: create the table with supabase/screening_results.sql, then set VITE_SAVE_SCREENING=true.
  */
 export async function saveScreeningResult(report: DiagnosticReport) {
-  if (!supabase || import.meta.env.VITE_SAVE_SCREENING !== 'true' || !report.screening) return { error: null };
+  if (!supabase || import.meta.env.VITE_SAVE_SCREENING === 'false' || !report.screening) return { error: null };
 
   try {
     const { data, error } = await supabase
