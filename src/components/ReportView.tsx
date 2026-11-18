@@ -60,7 +60,7 @@ export const ReportView: React.FC<Props> = ({ report, onLogout }) => {
       {/* Header & Actions */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-1">
         <div className="min-w-0">
-          <p className="eyebrow text-brand-600">ReVoice speech screening report</p>
+          <p className="eyebrow"><span className="text-[#3B82F6] font-bold">ReVoice</span> speech screening report</p>
           <h1 className="mt-1 text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
             Speech screening for {profile.name}
           </h1>

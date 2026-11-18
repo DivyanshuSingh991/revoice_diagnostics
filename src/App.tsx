@@ -106,7 +106,7 @@ export function App() {
               <AudioLines className="w-5 h-5" />
             </div>
             <div className="leading-tight">
-              <span className="font-display font-bold text-xl text-slate-900 tracking-tight">ReVoice</span>
+              <span className="font-display font-bold text-xl text-[#3B82F6] tracking-tight">ReVoice</span>
               <p className="text-[11px] text-slate-500 font-medium -mt-0.5">Child Speech Assessment</p>
             </div>
           </div>
@@ -200,7 +200,7 @@ export function App() {
 
       {/* Footer */}
       <footer className="text-center py-6 text-xs text-slate-400 mt-auto print:hidden">
-        ReVoice Pediatric Speech Assessment &copy; 2026 all rights reserved.
+        <span className="text-[#3B82F6] font-semibold">ReVoice</span> Pediatric Speech Assessment &copy; 2026 all rights reserved.
       </footer>
     </div>
   );
