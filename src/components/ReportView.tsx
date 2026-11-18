@@ -14,7 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import { METRIC_STYLES, MetricMeter, ScoreRing, scoreTone, StatusPill, STATUS_STYLES } from './ui';
-import { OVERALL_LABEL, bestVoiceAttempt, effectiveNaming, namingSummary, scoredNaming } from '../lib/screening';
+import { OVERALL_LABEL, ageBand, bestVoiceAttempt, effectiveNaming, namingSummary, scoredNaming } from '../lib/screening';
 import { PICTURE_WORDS } from '../lib/articulation';
 
 const SEVERITY_TONES: Record<DiagnosticReport['coreDiagnosis']['severity'], { panel: string; icon: string; badge: string }> = {
@@ -314,13 +314,18 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']> }> =
   const summary = namingSummary(tasks.naming);
   if (!voice && ddk.length === 0 && naming.length === 0) return null;
 
-  const cell = (label: string, value: React.ReactNode) => (
+  const cell = (label: string, value: React.ReactNode, hint?: string) => (
     <div>
       <dt className="text-[11px] font-medium text-slate-400">{label}</dt>
       <dd className="font-display text-lg font-bold text-slate-900 tabular-nums leading-tight">{value}</dd>
+      {hint && <p className="text-[10px] text-slate-500 mt-0.5">{hint}</p>}
     </div>
   );
   const val = (x: number, unit: string) => (Number.isNaN(x) ? '—' : `${x}${unit}`);
+
+  const band = ageBand(profile.age);
+  const mptExp = band === '3–5' ? 6 : band === '6–8' ? 8 : 10;
+  const pitchExp = band === '3–5' ? '250–350 Hz' : band === '6–8' ? '220–300 Hz' : '190–260 Hz';
 
   return (
     <section className="grid md:grid-cols-2 gap-4">
@@ -329,12 +334,12 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']> }> =
           <h3 className="text-lg font-bold text-slate-900">🎈 Voice &amp; breath</h3>
           <p className="text-xs text-slate-500 mb-4">Sustained “आ”, best of {tasks.voice?.length} tries</p>
           <dl className="grid grid-cols-3 gap-3">
-            {cell('Held for', `${voice.mptSec} s`)}
-            {cell('Pitch', voice.f0Hz ? `${voice.f0Hz} Hz` : '—')}
-            {cell('HNR', val(voice.hnrDb, ' dB'))}
-            {cell('Jitter', val(voice.jitterPct, '%'))}
-            {cell('Shimmer', val(voice.shimmerPct, '%'))}
-            {cell('Noise (SNR)', `${voice.snrDb} dB`)}
+            {cell('Held for', `${voice.mptSec} s`, `≥ ${mptExp}s normal`)}
+            {cell('Pitch', voice.f0Hz ? `${voice.f0Hz} Hz` : '—', `${pitchExp} normal`)}
+            {cell('HNR', val(voice.hnrDb, ' dB'), '≥ 12 dB normal')}
+            {cell('Jitter', val(voice.jitterPct, '%'), '≤ 1.5% normal')}
+            {cell('Shimmer', val(voice.shimmerPct, '%'), '≤ 6% normal')}
+            {cell('Noise (SNR)', `${voice.snrDb} dB`, '≥ 15 dB clean')}
           </dl>
         </div>
       )}
@@ -343,14 +348,19 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']> }> =
           <h3 className="text-lg font-bold text-slate-900">🚂 Speech motor</h3>
           <p className="text-xs text-slate-500 mb-4">Repeating syllables as fast as possible</p>
           <div className="space-y-3">
-            {ddk.map((d) => (
-              <dl key={d.kind} className="grid grid-cols-[6.5rem_1fr_1fr_1fr] gap-3 items-end">
-                <span className="font-display text-lg font-bold text-slate-700">{d.kind === 'amr' ? 'पा-पा-पा' : 'पा-टा-का'}</span>
-                {cell('Rate', `${d.ratePerSec}/s`)}
-                {cell('Rhythm', d.regularityCv > 0.3 ? 'Uneven' : 'Even')}
-                {cell('Order', d.kind === 'smr' ? (d.sequenceCorrect === undefined ? '—' : d.sequenceCorrect ? 'Kept' : 'Mixed') : 'n/a')}
-              </dl>
-            ))}
+            {ddk.map((d) => {
+              const expectedRate = d.kind === 'amr'
+                ? (band === '3–5' ? 3.0 : band === '6–8' ? 3.5 : 4.0)
+                : (band === '3–5' ? 2.5 : band === '6–8' ? 3.0 : 3.5);
+              return (
+                <dl key={d.kind} className="grid grid-cols-[6.5rem_1fr_1fr_1fr] gap-3 items-end">
+                  <span className="font-display text-lg font-bold text-slate-700">{d.kind === 'amr' ? 'पा-पा-पा' : 'पा-टा-का'}</span>
+                  {cell('Rate', `${d.ratePerSec}/s`, `≥ ${expectedRate}/s normal`)}
+                  {cell('Rhythm', d.regularityCv > 0.3 ? 'Uneven' : 'Even', `CV ${d.regularityCv} (≤ 0.30)`)}
+                  {cell('Order', d.kind === 'smr' ? (d.sequenceCorrect === undefined ? '—' : d.sequenceCorrect ? 'Kept' : 'Mixed') : 'n/a', d.kind === 'smr' ? 'Sequence' : undefined)}
+                </dl>
+              );
+            })}
           </div>
         </div>
       )}

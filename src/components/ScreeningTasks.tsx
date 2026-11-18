@@ -14,7 +14,7 @@ import {
 } from '../lib/screening';
 import { isDegenerateTranscript, transcribeAudio, trimSilence } from '../lib/whisper';
 import { ensureDevanagari } from '../lib/devanagari';
-import { decodeHiRes, downloadWav, useAudioCapture } from '../hooks/useAudioCapture';
+import { decodeHiRes, useAudioCapture } from '../hooks/useAudioCapture';
 import { StatusPill } from './ui';
 import { AlertTriangle, ArrowRight, Check, Mic, RotateCcw, Square, Volume2, X } from 'lucide-react';
 
@@ -133,6 +133,7 @@ const fmt = (x: number, unit = '') => (Number.isNaN(x) ? '—' : `${x}${unit}`);
 
 const MAX_VOICE_TRIES = 3;
 const MPT_EXPECTED: Record<string, number> = { '3–5': 6, '6–8': 8, '9+': 10 };
+const PITCH_EXPECTED: Record<string, string> = { '3–5': '250–350 Hz', '6–8': '220–300 Hz', '9+': '190–260 Hz' };
 
 export const VoiceTask: React.FC<{
   speakerId: string;
@@ -144,7 +145,9 @@ export const VoiceTask: React.FC<{
   const latest = useRef(attempts);
   latest.current = attempts;
   const best = bestVoiceAttempt(attempts);
-  const expected = MPT_EXPECTED[ageBand(age)];
+  const band = ageBand(age);
+  const expected = MPT_EXPECTED[band];
+  const pitchRange = PITCH_EXPECTED[band];
 
   const record = () =>
     cap.start({
@@ -159,7 +162,6 @@ export const VoiceTask: React.FC<{
         const m = analyzeSustainedVowel(pcm, hiRes);
         const n = latest.current.length + 1;
         const audioFilename = `REC_${speakerId.toUpperCase()}_L1V0${n}.WAV`;
-        downloadWav(pcm, audioFilename);
         update((prev) => [...prev, { attempt: n, ...m, audioFilename }]);
       },
     });
@@ -236,11 +238,11 @@ export const VoiceTask: React.FC<{
                   <span className="text-[11px] font-mono text-slate-400">{a.audioFilename}</span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                  <Stat label="Held for" value={`${a.mptSec} s`} />
-                  <Stat label="Pitch" value={a.f0Hz ? `${a.f0Hz} Hz` : '—'} />
-                  <Stat label="Jitter" value={fmt(a.jitterPct, '%')} hint="≤ 1.5% typical" />
-                  <Stat label="Shimmer" value={fmt(a.shimmerPct, '%')} hint="≤ 6% typical" />
-                  <Stat label="HNR" value={fmt(a.hnrDb, ' dB')} hint="≥ 12 dB typical" />
+                  <Stat label="Held for" value={`${a.mptSec} s`} hint={`≥ ${expected}s normal`} />
+                  <Stat label="Pitch" value={a.f0Hz ? `${a.f0Hz} Hz` : '—'} hint={`${pitchRange} normal`} />
+                  <Stat label="Jitter" value={fmt(a.jitterPct, '%')} hint="≤ 1.5% normal" />
+                  <Stat label="Shimmer" value={fmt(a.shimmerPct, '%')} hint="≤ 6% normal" />
+                  <Stat label="HNR" value={fmt(a.hnrDb, ' dB')} hint="≥ 12 dB normal" />
                 </div>
                 <div className="mt-3 space-y-1">
                   {a.mptSec < MIN_VALID_MPT && (
@@ -270,6 +272,11 @@ const DDK_INFO = {
   smr: { title: 'पा-टा-का', demo: 'पाटाका पाटाका पाटाका पाटाका', label: 'Sound sequence', emoji: '🚂' },
 } as const;
 
+const DDK_RATE_EXPECTED: Record<'amr' | 'smr', Record<string, number>> = {
+  amr: { '3–5': 3.0, '6–8': 3.5, '9+': 4.0 },
+  smr: { '3–5': 2.5, '6–8': 3.0, '9+': 3.5 },
+};
+
 const DdkPanel: React.FC<{
   kind: 'amr' | 'smr';
   speakerId: string;
@@ -280,6 +287,9 @@ const DdkPanel: React.FC<{
   const cap = useAudioCapture();
   const info = DDK_INFO[kind];
   const remaining = Math.max(0, DDK_MS - cap.elapsedMs);
+  const band = ageBand(age);
+  const expectedRate = DDK_RATE_EXPECTED[kind][band];
+  const expectedSyllables = Math.round(expectedRate * 6);
 
   const record = () =>
     cap.start({
@@ -287,7 +297,6 @@ const DdkPanel: React.FC<{
       onDone: ({ pcm }) => {
         const m = analyzeDdk(pcm);
         const audioFilename = `REC_${speakerId.toUpperCase()}_L2${kind.toUpperCase()}.WAV`;
-        downloadWav(pcm, audioFilename);
         onResult({ kind, ...m, audioFilename, sequenceCorrect: kind === 'smr' ? result?.sequenceCorrect : undefined });
       },
     });
@@ -332,9 +341,9 @@ const DdkPanel: React.FC<{
             <StatusPill status={ddkStatus(age, result)} />
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <Stat label="Rate" value={`${result.ratePerSec}/s`} />
-            <Stat label="Syllables" value={result.syllables} />
-            <Stat label="Rhythm" value={result.regularityCv > 0.3 ? 'Uneven' : 'Even'} hint={`CV ${result.regularityCv}`} />
+            <Stat label="Rate" value={`${result.ratePerSec}/s`} hint={`≥ ${expectedRate}/s normal`} />
+            <Stat label="Syllables" value={result.syllables} hint={`≥ ${expectedSyllables} in 6s normal`} />
+            <Stat label="Rhythm" value={result.regularityCv > 0.3 ? 'Uneven' : 'Even'} hint={`CV ${result.regularityCv} (≤ 0.30 normal)`} />
           </div>
           <NoiseWarning snrDb={result.snrDb} min={10} />
           {kind === 'smr' && (
@@ -423,7 +432,6 @@ export const NamingTask: React.FC<{
         const browser = ensureDevanagari(browserText);
         const score = scoreNamingAttempt(word, [browser, whisperText]);
         const audioFilename = `REC_${speakerId.toUpperCase()}_L3W${word.id.toString().padStart(2, '0')}.WAV`;
-        downloadWav(pcm, audioFilename);
         const heard = browser || whisperText;
         // A one-picture answer is 1–3 words ("यह सेब है"); a long transcript means ASR guessed.
         const unclear = heard.split(/\s+/).filter(Boolean).length > 4;
