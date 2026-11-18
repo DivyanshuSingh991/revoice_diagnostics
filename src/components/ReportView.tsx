@@ -264,7 +264,7 @@ export const ReportView: React.FC<Props> = ({ report, onLogout }) => {
         </ol>
       </section>
 
-      {report.tasks && <TaskDetails tasks={report.tasks} />}
+      {report.tasks && <TaskDetails tasks={report.tasks} age={profile.age} />}
 
       {/* Clinical Guidance: How Child Can Speak More Clearly */}
       <section>
@@ -307,7 +307,7 @@ export const ReportView: React.FC<Props> = ({ report, onLogout }) => {
   );
 };
 
-const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']> }> = ({ tasks }) => {
+const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age: number }> = ({ tasks, age }) => {
   const voice = bestVoiceAttempt(tasks.voice);
   const ddk = [tasks.ddk?.amr, tasks.ddk?.smr].filter((d): d is NonNullable<typeof d> => !!d);
   const naming = scoredNaming(tasks.naming);
@@ -323,7 +323,7 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']> }> =
   );
   const val = (x: number, unit: string) => (Number.isNaN(x) ? '—' : `${x}${unit}`);
 
-  const band = ageBand(profile.age);
+  const band = ageBand(age);
   const mptExp = band === '3–5' ? 6 : band === '6–8' ? 8 : 10;
   const pitchExp = band === '3–5' ? '250–350 Hz' : band === '6–8' ? '220–300 Hz' : '190–260 Hz';
 
