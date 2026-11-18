@@ -3,15 +3,32 @@
  * Zero npm dependency required - fixes Vite import-analysis error completely!
  */
 
-const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/\/+$/, '');
-const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '').trim();
+const DEFAULT_SUPABASE_URL = 'https://ounpskhaqkuzkhvusavp.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_iEXW1SDIa3jHCIN9rePapw_7FrZVBwm';
+
+const SUPABASE_URL = (
+  import.meta.env.VITE_SUPABASE_URL ||
+  DEFAULT_SUPABASE_URL
+).trim().replace(/\/+$/, '');
+
+const SUPABASE_ANON_KEY = (
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  DEFAULT_SUPABASE_KEY
+).trim();
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+export interface SelectQueryOptions {
+  order?: string;
+  limit?: number;
+  filters?: Record<string, string | number | boolean>;
+}
 
 interface PostgrestFilterBuilder {
   upsert: (payload: any, options?: { onConflict?: string }) => Promise<{ data: any; error: any }>;
   insert: (payload: any) => Promise<{ data: any; error: any }>;
-  select: (columns?: string) => Promise<{ data: any; error: any }>;
+  select: (columns?: string, options?: SelectQueryOptions) => Promise<{ data: any; error: any }>;
 }
 
 export const supabase = {
@@ -86,9 +103,24 @@ export const supabase = {
         }
       },
 
-      async select(columns = '*') {
+      async select(columns = '*', options?: SelectQueryOptions) {
         try {
-          const url = `${SUPABASE_URL}/rest/v1/${tableName}?select=${encodeURIComponent(columns)}`;
+          let url = `${SUPABASE_URL}/rest/v1/${tableName}?select=${encodeURIComponent(columns)}`;
+          
+          if (options?.order) {
+            url += `&order=${encodeURIComponent(options.order)}`;
+          }
+          if (typeof options?.limit === 'number') {
+            url += `&limit=${options.limit}`;
+          }
+          if (options?.filters) {
+            for (const [key, val] of Object.entries(options.filters)) {
+              if (val !== undefined && val !== null) {
+                url += `&${encodeURIComponent(key)}=${encodeURIComponent(String(val))}`;
+              }
+            }
+          }
+
           const res = await fetch(url, {
             method: 'GET',
             headers: {
@@ -99,12 +131,14 @@ export const supabase = {
 
           if (!res.ok) {
             const errBody = await res.text();
+            console.error(`[Supabase Error on ${tableName} select]:`, errBody);
             return { data: null, error: errBody };
           }
 
           const data = await res.json();
           return { data, error: null };
         } catch (err: any) {
+          console.error(`[Supabase Network Error on ${tableName} select]:`, err);
           return { data: null, error: err?.message || err };
         }
       }
@@ -113,7 +147,7 @@ export const supabase = {
 };
 
 if (isSupabaseConfigured) {
-  console.log('[Supabase Native Client] Configured for:', SUPABASE_URL);
+  console.log('[Supabase Native Client] Connected to:', SUPABASE_URL);
 } else {
-  console.info('[Supabase Native Client] Running in local-only mode (No VITE_SUPABASE_URL provided in .env)');
+  console.info('[Supabase Native Client] Running in local-only mode');
 }
