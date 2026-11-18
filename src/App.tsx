@@ -6,7 +6,7 @@ import { saveSpeakerProfile, saveDiagnosticAssessment, saveScreeningResult } fro
 import { SignupConsent } from './components/SignupConsent';
 import { AssessmentStation } from './components/AssessmentStation';
 import { ReportView } from './components/ReportView';
-import { AudioLines, Check, LogOut } from 'lucide-react';
+import { Check, LogOut } from 'lucide-react';
 
 const STORAGE_KEYS = {
   PROFILE: 'revoice_active_profile',
@@ -101,14 +101,9 @@ export function App() {
       {/* Top Navbar */}
       <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-30 print:hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-sm shadow-brand-600/30">
-              <AudioLines className="w-5 h-5" />
-            </div>
-            <div className="leading-tight">
-              <span className="font-display font-bold text-xl text-[#3B82F6] tracking-tight">ReVoice</span>
-              <p className="text-[11px] text-slate-500 font-medium -mt-0.5">Child Speech Assessment</p>
-            </div>
+          <div className="min-w-0 leading-tight">
+            <span className="font-display font-bold text-xl text-[#3B82F6] tracking-tight">ReVoice</span>
+            <p className="text-[11px] text-slate-500 font-medium -mt-0.5">Child Speech Assessment</p>
           </div>
 
           <ol className="hidden md:flex items-center gap-1 text-sm" aria-label="Progress">
