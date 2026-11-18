@@ -91,6 +91,12 @@ export function App() {
     setReport(null);
   };
 
+  // Return from Report to Recording view without losing progress
+  const handleBackToRecord = () => {
+    setReport(null);
+    localStorage.removeItem(STORAGE_KEYS.REPORT);
+  };
+
   const step = report ? 3 : profile ? 2 : 1;
   // whisperReady is also set when loading fails; a loaded model always reports its backend.
   const modelState = !whisperReady ? 'loading' : getWhisperBackend() ? 'ready' : 'offline';
@@ -189,6 +195,7 @@ export function App() {
           <ReportView
             report={report}
             onLogout={handleLogout}
+            onBackToRecord={handleBackToRecord}
           />
         )}
       </main>

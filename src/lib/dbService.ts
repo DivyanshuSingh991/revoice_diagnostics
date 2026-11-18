@@ -130,7 +130,8 @@ export async function saveScreeningResult(report: DiagnosticReport) {
         avg_word_accuracy: report.avgAccuracy ?? null,
         voice_attempts: report.tasks?.voice ?? [],
         ddk: report.tasks?.ddk ?? {},
-        picture_naming: report.tasks?.naming ?? []
+        picture_naming: report.tasks?.naming ?? [],
+        same_sound_challenge: report.tasks?.sameSound ?? null
       });
 
     if (error) {

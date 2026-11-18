@@ -22,10 +22,12 @@ export type AgeBand = '3–5' | '6–8' | '9+';
 export const ageBand = (age: number): AgeBand => (age <= 5 ? '3–5' : age <= 8 ? '6–8' : '9+');
 
 /** [typical if ≥, refer if <] — anything in between is "monitor". */
-const CUTOFFS: Record<'mpt' | 'pcc' | 'amr' | 'smr' | 'wordAcc', Record<AgeBand, [number, number]>> = {
+const CUTOFFS: Record<'mpt' | 'pcc' | 'amr' | 'ta' | 'ka' | 'smr' | 'wordAcc', Record<AgeBand, [number, number]>> = {
   mpt: { '3–5': [6, 4], '6–8': [8, 5], '9+': [10, 6] }, // seconds, best of 3
   pcc: { '3–5': [80, 65], '6–8': [90, 75], '9+': [95, 85] }, // % consonants correct
   amr: { '3–5': [3.0, 2.0], '6–8': [3.5, 2.5], '9+': [4.0, 3.0] }, // पा-पा-पा syllables/s
+  ta: { '3–5': [3.0, 2.0], '6–8': [3.5, 2.5], '9+': [4.0, 3.0] }, // ता-ता-ता syllables/s
+  ka: { '3–5': [2.8, 1.8], '6–8': [3.3, 2.3], '9+': [3.8, 2.8] }, // का-का-का syllables/s
   smr: { '3–5': [2.5, 1.5], '6–8': [3.0, 2.0], '9+': [3.5, 2.5] }, // पा-टा-का syllables/s
   wordAcc: { '3–5': [75, 50], '6–8': [85, 60], '9+': [90, 70] }, // sentence word accuracy %
 };
@@ -256,24 +258,33 @@ export function buildScreening(age: number, sentences: SentenceEvaluation[], tas
   // 5. Speech motor (DDK)
   {
     const amr = tasks.ddk?.amr;
+    const ta = tasks.ddk?.ta;
+    const ka = tasks.ddk?.ka;
     const smr = tasks.ddk?.smr;
-    const status = worst(ddkStatus(age, amr), ddkStatus(age, smr));
-    const parts = [amr && `पा-पा-पा ${amr.ratePerSec}/s`, smr && `पा-टा-का ${smr.ratePerSec}/s`].filter(Boolean);
+    const allResults = [amr, ta, ka, smr].filter((r): r is DdkResult => !!r);
+    const status = allResults.length ? worst(...allResults.map((r) => ddkStatus(age, r))) : 'not_tested';
+    const parts = [
+      amr && `पा-पा-पा ${amr.ratePerSec}/s`,
+      ta && `ता-ता-ता ${ta.ratePerSec}/s`,
+      ka && `का-का-का ${ka.ratePerSec}/s`,
+      smr && `पा-टा-का ${smr.ratePerSec}/s`,
+    ].filter(Boolean);
     const notes = [];
-    for (const r of [amr, smr]) {
+    for (const r of allResults) {
       if (r && r.syllables >= 4 && gradeHigherBetter(r.ratePerSec, CUTOFFS[r.kind][band]) !== 'typical') {
-        notes.push(`${r.kind === 'amr' ? 'पा-पा-पा' : 'पा-टा-का'} slower than expected (≥ ${CUTOFFS[r.kind][band][0]}/s)`);
+        const title = r.kind === 'amr' ? 'पा-पा-पा' : r.kind === 'ta' ? 'ता-ता-ता' : r.kind === 'ka' ? 'का-का-का' : 'पा-टा-का';
+        notes.push(`${title} slower than expected (≥ ${CUTOFFS[r.kind][band][0]}/s)`);
       }
     }
-    if ([amr, smr].some((r) => r && r.syllables < 4)) notes.push('too few syllables detected — retest');
-    if ((amr?.regularityCv ?? 0) > 0.3 || (smr?.regularityCv ?? 0) > 0.3) notes.push('uneven rhythm');
+    if (allResults.some((r) => r && r.syllables < 4)) notes.push('too few syllables detected — retest');
+    if (allResults.some((r) => (r?.regularityCv ?? 0) > 0.3)) notes.push('uneven rhythm');
     if (smr?.sequenceCorrect === false) notes.push('could not keep the पा-टा-का order (check motor planning)');
     domains.push({
       key: 'motor',
       label: 'Speech motor (DDK)',
       status,
       measure: parts.length ? parts.join(' · ') : '—',
-      note: !amr && !smr ? 'Pa-ta-ka task not done.' : notes.length ? capitalise(notes.join('; ')) : 'Rate and rhythm within the expected range.',
+      note: allResults.length === 0 ? 'DDK tasks not done.' : notes.length ? capitalise(notes.join('; ')) : 'Rate and rhythm within the expected range.',
     });
   }
 

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ScreeningTasks, SentenceEvaluation, SentenceItem } from '../types';
-import { PICTURE_WORDS } from '../lib/articulation';
 import { SentenceRecorder } from './SentenceRecorder';
-import { DdkTask, NamingTask, VoiceTask } from './ScreeningTasks';
-import { Check, FileText, Image, MessageSquareText, TrainFront, Wind } from 'lucide-react';
+import { DdkTask, VoiceTask } from './ScreeningTasks';
+import { SameSoundTask } from './SameSoundChallenge';
+import { Check, FileText, MessageSquareText, TrainFront, Wind, Sparkles } from 'lucide-react';
 
 interface Props {
   sentences: SentenceItem[];
@@ -14,7 +14,7 @@ interface Props {
   age: number;
 }
 
-type TaskKey = 'sentences' | 'voice' | 'ddk' | 'naming';
+type TaskKey = 'sentences' | 'voice' | 'ddk' | 'sameSound';
 
 /** Screening protocol: sentences (required) plus three optional tasks. */
 export const AssessmentStation: React.FC<Props> = ({ sentences, onGenerateReport, whisperReady, childName, speakerId, age }) => {
@@ -31,14 +31,18 @@ export const AssessmentStation: React.FC<Props> = ({ sentences, onGenerateReport
   };
 
   const voiceCount = tasks.voice?.length ?? 0;
-  const ddkCount = (tasks.ddk?.amr ? 1 : 0) + (tasks.ddk?.smr ? 1 : 0);
-  const namingCount = tasks.naming?.length ?? 0;
+  const ddkCount =
+    (tasks.ddk?.amr ? 1 : 0) +
+    (tasks.ddk?.ta ? 1 : 0) +
+    (tasks.ddk?.ka ? 1 : 0) +
+    (tasks.ddk?.smr ? 1 : 0);
+  const sameSoundDone = Boolean(tasks.sameSound && tasks.sameSound.rounds.length > 0);
 
   const tabs: { key: TaskKey; label: string; area: string; icon: React.ElementType; progress: string; done: boolean }[] = [
     { key: 'sentences', label: 'Sentences', area: 'Fluency', icon: MessageSquareText, progress: `${evaluations.length}/${sentences.length}`, done: evaluations.length >= 3 },
-    { key: 'voice', label: 'Balloon “आ”', area: 'Voice', icon: Wind, progress: `${voiceCount}/3`, done: voiceCount >= 2 },
-    { key: 'ddk', label: 'Pa-ta-ka', area: 'Motor', icon: TrainFront, progress: `${ddkCount}/2`, done: ddkCount === 2 },
-    { key: 'naming', label: 'Pictures', area: 'Sounds', icon: Image, progress: `${namingCount}/${PICTURE_WORDS.length}`, done: namingCount >= 10 },
+    { key: 'sameSound', label: 'Same Sound', area: 'Articulation', icon: Sparkles, progress: sameSoundDone ? '1/1' : '0/1', done: sameSoundDone },
+    { key: 'voice', label: 'Bird Flight “आ”', area: 'Voice', icon: Wind, progress: `${voiceCount}/3`, done: voiceCount >= 2 },
+    { key: 'ddk', label: 'Pa-Ta-Ka (DDK)', area: 'Motor', icon: TrainFront, progress: `${ddkCount}/4`, done: ddkCount >= 3 },
   ];
 
   return (
@@ -73,10 +77,7 @@ export const AssessmentStation: React.FC<Props> = ({ sentences, onGenerateReport
             );
           })}
         </nav>
-        <div className="flex items-center gap-3 lg:pl-3 lg:border-l border-slate-100">
-          <p className="text-[11px] text-slate-500 leading-tight lg:max-w-[9rem]">
-            Only sentences are required. More tasks = a fuller screen.
-          </p>
+        <div className="flex items-center lg:pl-3 lg:border-l border-slate-100 shrink-0">
           <button onClick={() => generate()} className="btn-primary h-11 px-4 text-sm shrink-0">
             <FileText className="w-4 h-4" />
             Generate report
@@ -106,12 +107,13 @@ export const AssessmentStation: React.FC<Props> = ({ sentences, onGenerateReport
       <div className={active === 'ddk' ? '' : 'hidden'}>
         <DdkTask speakerId={speakerId} age={age} ddk={tasks.ddk} update={(fn) => setTasks((t) => ({ ...t, ddk: fn(t.ddk ?? {}) }))} />
       </div>
-      <div className={active === 'naming' ? '' : 'hidden'}>
-        <NamingTask
+      <div className={active === 'sameSound' ? '' : 'hidden'}>
+        <SameSoundTask
           speakerId={speakerId}
+          age={age}
           whisperReady={whisperReady}
-          items={tasks.naming ?? []}
-          update={(fn) => setTasks((t) => ({ ...t, naming: fn(t.naming ?? []) }))}
+          result={tasks.sameSound}
+          onResult={(res) => setTasks((t) => ({ ...t, sameSound: res }))}
         />
       </div>
     </div>

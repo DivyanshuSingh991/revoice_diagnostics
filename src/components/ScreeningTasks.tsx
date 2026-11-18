@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { DdkResult, NamingItem, ScreeningTasks, VoiceAttempt } from '../types';
+import { DdkResult, DdkKind, NamingItem, ScreeningTasks, VoiceAttempt } from '../types';
 import { analyzeDdk, analyzeSustainedVowel } from '../lib/acoustics';
 import { PICTURE_WORDS, scoreNamingAttempt } from '../lib/articulation';
 import {
@@ -152,60 +152,112 @@ export const VoiceTask: React.FC<{
   const record = () =>
     cap.start({
       maxMs: 30000,
-      onDone: async ({ blob, pcm }) => {
+      onDone: async ({ blob, rawPcm }) => {
         let hiRes: { pcm: Float32Array; sr: number; offsetSec: number } | undefined;
         try {
-          hiRes = { pcm: trimSilence(await decodeHiRes(blob), 48000), sr: 48000, offsetSec: 0 };
+          hiRes = { pcm: await decodeHiRes(blob), sr: 48000, offsetSec: 0 };
         } catch (_) {
           hiRes = undefined;
         }
-        const m = analyzeSustainedVowel(pcm, hiRes);
+        const m = analyzeSustainedVowel(rawPcm, hiRes);
         const n = latest.current.length + 1;
         const audioFilename = `REC_${speakerId.toUpperCase()}_L1V0${n}.WAV`;
         update((prev) => [...prev, { attempt: n, ...m, audioFilename }]);
       },
     });
 
-  const balloonScale = cap.status === 'recording' ? 1 + Math.min(cap.elapsedMs / 1000 / expected, 1.4) : 1;
+  const isVoicing = cap.status === 'recording' && cap.liveVolume > 0.08;
+  const flightHeightPct = cap.status === 'recording'
+    ? isVoicing
+      ? Math.min(85, Math.max(20, (cap.elapsedMs / 1000 / expected) * 75 + cap.liveVolume * 25))
+      : 8 // Bird glides down / falls when breath stops
+    : attempts.length > 0
+    ? 45
+    : 10;
 
   return (
     <section className="card overflow-hidden">
       <TaskHeader
-        emoji="🎈"
-        eyebrow="Voice & breath · Sustained vowel"
-        title="Balloon breath: “आआआ…”"
+        emoji="🕊️"
+        eyebrow="Voice & breath support · Sustained Phonation"
+        title="Bird Flight Challenge: “आआआ…”"
         aside={
           <button onClick={() => speak('आआआआआआआआ', 0.5)} className="btn-secondary h-9 px-3.5 text-sm rounded-full self-start">
             <Volume2 className="w-4 h-4 text-brand-600" /> Listen
           </button>
         }
       >
-        Take a big breath, then say <strong className="font-display text-base">“आ”</strong> in one long, steady voice for as long as possible —
-        like filling a balloon. Keep the same loudness. Best of {MAX_VOICE_TRIES} tries counts.
+        Take a deep breath, then say <strong className="font-display text-base">“आ”</strong> steadily. As long as you sustain your voice, the bird flies high across the sky!
+        If your breath stops or drops, the bird glides down. Best of {MAX_VOICE_TRIES} tries counts.
       </TaskHeader>
 
-      <div className="mx-4 md:mx-8 my-6 rounded-3xl bg-gradient-to-b from-sky-50 to-white border border-slate-100 py-8 flex flex-col items-center min-h-[17rem] justify-center">
-        <div className="h-24 flex items-end justify-center mb-4">
-          <span
-            className="text-6xl transition-transform duration-200 origin-bottom inline-block"
-            style={{ transform: `scale(${balloonScale})` }}
-            aria-hidden
-          >
-            🎈
+      {/* Interactive Bird Sky Game Area */}
+      <div className="mx-4 md:mx-8 my-6 rounded-3xl bg-gradient-to-b from-sky-200 via-sky-100 to-emerald-100 border border-sky-200/80 p-6 flex flex-col items-center min-h-[20rem] justify-between relative overflow-hidden shadow-inner">
+        {/* Floating clouds background */}
+        <div className="absolute top-4 left-6 text-2xl opacity-60 select-none animate-pulse">☁️</div>
+        <div className="absolute top-10 right-12 text-3xl opacity-50 select-none">☁️</div>
+        <div className="absolute top-24 left-1/3 text-xl opacity-40 select-none">☁️</div>
+
+        {/* Sky flight altitude target line */}
+        <div className="w-full flex items-center justify-between border-b-2 border-dashed border-sky-400/40 pb-1 px-4 z-0">
+          <span className="text-[11px] font-bold text-sky-700 bg-white/70 px-2 py-0.5 rounded-full backdrop-blur-xs">
+            🎯 Target Goal: ≥ {expected}s in flight
           </span>
+          <span className="text-[11px] font-bold text-sky-600">Sky Horizon 🌤️</span>
         </div>
+
+        {/* Interactive Bird Avatar */}
+        <div className="w-full relative h-36 flex items-center justify-center my-auto z-10">
+          <div
+            className="absolute transition-all duration-300 ease-out flex flex-col items-center"
+            style={{
+              bottom: `${flightHeightPct}%`,
+              transform: isVoicing ? 'rotate(-6deg) scale(1.15)' : 'rotate(18deg) scale(0.95)',
+            }}
+          >
+            <span className="text-6xl select-none filter drop-shadow-md">
+              {isVoicing ? '🕊️' : cap.status === 'recording' ? '🦅' : '🐦'}
+            </span>
+            {cap.status === 'recording' && (
+              <span
+                className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full mt-1 shadow-xs transition ${
+                  isVoicing ? 'bg-emerald-500 text-white animate-bounce' : 'bg-amber-500 text-white'
+                }`}
+              >
+                {isVoicing ? 'Flying! Keep going!' : 'Gliding down... keep saying आ!'}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Live Timer and Audio Energy Meter */}
         {cap.status === 'recording' && (
-          <p className="font-display text-4xl font-bold text-slate-900 tabular-nums mb-4">{(cap.elapsedMs / 1000).toFixed(1)} s</p>
+          <div className="flex flex-col items-center mb-3 z-10">
+            <p className="font-display text-4xl font-extrabold text-sky-950 tabular-nums">
+              {(cap.elapsedMs / 1000).toFixed(1)} s
+            </p>
+            <div className="w-40 h-2 bg-white/80 rounded-full mt-1.5 overflow-hidden p-0.5 shadow-inner">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-75"
+                style={{ width: `${Math.round(cap.liveVolume * 100)}%` }}
+              />
+            </div>
+          </div>
         )}
-        <RecordControl
-          status={cap.status}
-          disabled={attempts.length >= MAX_VOICE_TRIES}
-          onStart={record}
-          onStop={cap.stop}
-          idleLabel={attempts.length >= MAX_VOICE_TRIES ? 'All 3 tries done' : `Try ${attempts.length + 1} of ${MAX_VOICE_TRIES}`}
-          recordingLabel="Keep going… tap Stop when the sound ends"
-        />
-        <p className="mt-2 text-xs text-slate-500">Expected for age {ageBand(age)}: at least {expected} seconds</p>
+
+        <div className="z-10 flex flex-col items-center">
+          <RecordControl
+            status={cap.status}
+            disabled={attempts.length >= MAX_VOICE_TRIES}
+            onStart={record}
+            onStop={cap.stop}
+            idleLabel={attempts.length >= MAX_VOICE_TRIES ? 'All 3 tries done' : `Try ${attempts.length + 1} of ${MAX_VOICE_TRIES}`}
+            recordingLabel="Keep saying 'आआआ'… tap Stop when breath ends"
+          />
+          <p className="mt-2 text-xs font-medium text-sky-900 bg-white/60 px-3 py-1 rounded-full backdrop-blur-xs">
+            Expected duration for age {ageBand(age)}: at least <strong>{expected} seconds</strong>
+          </p>
+        </div>
       </div>
 
       {attempts.length > 0 && (
@@ -262,23 +314,27 @@ export const VoiceTask: React.FC<{
 };
 
 // ---------------------------------------------------------------------------
-// 2. DDK — पा-पा-पा and पा-टा-का
+// 2. DDK — पा-पा-पा, ता-ता-ता, का-का-का, and पा-टा-का
 // ---------------------------------------------------------------------------
 
 const DDK_MS = 6000;
 
-const DDK_INFO = {
-  amr: { title: 'पा-पा-पा', demo: 'पा पा पा पा पा पा पा पा', label: 'Same sound', emoji: '🥁' },
-  smr: { title: 'पा-टा-का', demo: 'पाटाका पाटाका पाटाका पाटाका', label: 'Sound sequence', emoji: '🚂' },
-} as const;
+const DDK_INFO: Record<DdkKind, { title: string; demo: string; label: string; emoji: string }> = {
+  amr: { title: 'पा-पा-पा', demo: 'पा पा पा पा पा पा पा पा', label: 'Lip sound (Bilabial)', emoji: '🥁' },
+  ta: { title: 'ता-ता-ता', demo: 'ता ता ता ता ता ता ता ता', label: 'Tongue-tip sound (Dental)', emoji: '🔔' },
+  ka: { title: 'का-का-का', demo: 'का का का का का का का का', label: 'Back tongue sound (Velar)', emoji: '🐦' },
+  smr: { title: 'पा-टा-का', demo: 'पाटाका पाटाका पाटाका पाटाका', label: 'Sequenced movement (SMR)', emoji: '🚂' },
+};
 
-const DDK_RATE_EXPECTED: Record<'amr' | 'smr', Record<string, number>> = {
+const DDK_RATE_EXPECTED: Record<DdkKind, Record<string, number>> = {
   amr: { '3–5': 3.0, '6–8': 3.5, '9+': 4.0 },
+  ta: { '3–5': 3.0, '6–8': 3.5, '9+': 4.0 },
+  ka: { '3–5': 2.8, '6–8': 3.3, '9+': 3.8 },
   smr: { '3–5': 2.5, '6–8': 3.0, '9+': 3.5 },
 };
 
 const DdkPanel: React.FC<{
-  kind: 'amr' | 'smr';
+  kind: DdkKind;
   speakerId: string;
   age: number;
   result?: DdkResult;
@@ -294,34 +350,35 @@ const DdkPanel: React.FC<{
   const record = () =>
     cap.start({
       maxMs: DDK_MS,
-      onDone: ({ pcm }) => {
-        const m = analyzeDdk(pcm);
+      onDone: ({ rawPcm }) => {
+        // Use raw untrimmed audio to accurately catch every single syllable from start to finish
+        const m = analyzeDdk(rawPcm);
         const audioFilename = `REC_${speakerId.toUpperCase()}_L2${kind.toUpperCase()}.WAV`;
         onResult({ kind, ...m, audioFilename, sequenceCorrect: kind === 'smr' ? result?.sequenceCorrect : undefined });
       },
     });
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 bg-white p-5 flex flex-col">
+    <div className="rounded-3xl border border-slate-200/80 bg-white p-5 flex flex-col justify-between">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="eyebrow">{info.label}</p>
-          <p className="font-display text-3xl font-bold text-slate-900">
+          <p className="font-display text-2xl lg:text-3xl font-bold text-slate-900 mt-0.5">
             {info.emoji} {info.title}
           </p>
         </div>
-        <button onClick={() => speak(info.demo, 1.1)} className="btn-secondary h-9 px-3 text-sm rounded-full">
-          <Volume2 className="w-4 h-4 text-brand-600" /> Listen
+        <button onClick={() => speak(info.demo, 1.1)} className="btn-secondary h-8 px-2.5 text-xs rounded-full">
+          <Volume2 className="w-3.5 h-3.5 text-brand-600" /> Listen
         </button>
       </div>
 
       <div className="my-5 flex flex-col items-center">
         {cap.status === 'recording' && (
-          <div className="w-full mb-4">
+          <div className="w-full mb-3">
             <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
               <div className="h-full bg-rose-500 transition-[width] duration-100" style={{ width: `${(remaining / DDK_MS) * 100}%` }} />
             </div>
-            <p className="text-center mt-1 text-xs font-semibold text-rose-600 tabular-nums">{(remaining / 1000).toFixed(1)} s left</p>
+            <p className="text-center mt-1 text-xs font-semibold text-rose-600 tabular-nums">{(remaining / 1000).toFixed(1)} s remaining</p>
           </div>
         )}
         <RecordControl
@@ -337,27 +394,38 @@ const DdkPanel: React.FC<{
       {result && (
         <div className="mt-auto pt-4 border-t border-slate-100 space-y-3 animate-fade-up">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-600">Result</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Score</span>
             <StatusPill status={ddkStatus(age, result)} />
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <Stat label="Rate" value={`${result.ratePerSec}/s`} hint={`≥ ${expectedRate}/s normal`} />
-            <Stat label="Syllables" value={result.syllables} hint={`≥ ${expectedSyllables} in 6s normal`} />
-            <Stat label="Rhythm" value={result.regularityCv > 0.3 ? 'Uneven' : 'Even'} hint={`CV ${result.regularityCv} (≤ 0.30 normal)`} />
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 block font-medium">Rate</span>
+              <span className="font-display text-base font-bold text-slate-800">{result.ratePerSec}/s</span>
+            </div>
+            <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 block font-medium">Syllables</span>
+              <span className="font-display text-base font-bold text-slate-800">{result.syllables}</span>
+            </div>
+            <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 block font-medium">Rhythm</span>
+              <span className={`font-display text-xs font-bold ${result.regularityCv > 0.3 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                {result.regularityCv > 0.3 ? 'Uneven' : 'Even'}
+              </span>
+            </div>
           </div>
           <NoiseWarning snrDb={result.snrDb} min={10} />
           {kind === 'smr' && (
-            <div className="rounded-xl bg-slate-50 p-3">
-              <p className="text-xs font-semibold text-slate-700 mb-2">Examiner: did the child keep the पा-टा-का order?</p>
+            <div className="rounded-xl bg-slate-50 p-2.5">
+              <p className="text-[11px] font-semibold text-slate-700 mb-1.5">Examiner: did the child keep the पा-टा-का order?</p>
               <div className="flex gap-2">
                 {[
                   { v: true, label: 'Yes' },
-                  { v: false, label: 'No — mixed up' },
+                  { v: false, label: 'Mixed up' },
                 ].map((o) => (
                   <button
                     key={o.label}
                     onClick={() => onResult({ ...result, sequenceCorrect: o.v })}
-                    className={`btn h-8 px-3 text-xs rounded-lg border ${
+                    className={`btn h-7 px-2.5 text-xs rounded-lg border ${
                       result.sequenceCorrect === o.v ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-slate-600 border-slate-200'
                     }`}
                   >
@@ -380,12 +448,13 @@ export const DdkTask: React.FC<{
   update: Updater<NonNullable<ScreeningTasks['ddk']>>;
 }> = ({ speakerId, age, ddk = {}, update }) => (
   <section className="card overflow-hidden">
-    <TaskHeader emoji="🚂" eyebrow="Speech motor · Diadochokinesis" title="Train talk">
-      Say the sounds as <strong>fast and clearly</strong> as possible, over and over, until the timer ends. Tap Listen to hear an
-      example first. Recording stops by itself after 6 seconds.
+    <TaskHeader emoji="🚂" eyebrow="Speech motor &amp; Articulation Speed · Diadochokinesis" title="Syllable Train: Pa-Ta-Ka (2×2)">
+      Say each sound as <strong>fast and clearly</strong> as possible over and over until the 6-second timer ends. Tap Listen to hear an
+      example first. Measures oral-motor coordination across lips, tongue tip, back of tongue, and sequence transitions.
     </TaskHeader>
-    <div className="grid md:grid-cols-2 gap-4 p-4 md:p-8 pt-6">
-      {(['amr', 'smr'] as const).map((kind) => (
+    {/* 4 Cards in 2x2 Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 md:p-8 pt-6">
+      {(['amr', 'ta', 'ka', 'smr'] as const).map((kind) => (
         <DdkPanel
           key={kind}
           kind={kind}

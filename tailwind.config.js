@@ -4,19 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: '#f6f6fb',
+        canvas: '#f8fafc',
         brand: {
-          50: '#eef0ff',
-          100: '#e0e3ff',
-          200: '#c6caff',
-          300: '#a3a6fd',
-          400: '#8381f8',
-          500: '#6a5ff1',
-          600: '#5a45e5',
-          700: '#4c37ca',
-          800: '#3e2fa3',
-          900: '#352d81',
-          950: '#211a4b',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          950: '#082f49',
         },
       },
       fontFamily: {
@@ -25,7 +25,7 @@ export default {
       },
       boxShadow: {
         card: '0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.06)',
-        lift: '0 2px 4px rgb(15 23 42 / 0.04), 0 16px 40px -12px rgb(76 55 202 / 0.18)',
+        lift: '0 2px 4px rgb(15 23 42 / 0.04), 0 16px 40px -12px rgb(2 132 199 / 0.22)',
       },
       keyframes: {
         'fade-up': {

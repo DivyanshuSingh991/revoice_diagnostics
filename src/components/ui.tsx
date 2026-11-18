@@ -6,8 +6,8 @@ import { STATUS_LABEL } from '../lib/screening';
 export const METRIC_STYLES = {
   clarity: { label: 'Clarity', short: 'Clarity', hint: 'Words spoken accurately', bar: 'bg-brand-500', text: 'text-brand-700', soft: 'bg-brand-50' },
   repetition: { label: 'Repetition', short: 'Repetition', hint: 'Free of repeated syllables', bar: 'bg-teal-500', text: 'text-teal-700', soft: 'bg-teal-50' },
-  accuracy: { label: 'Word accuracy', short: 'Accuracy', hint: 'Right words, in order', bar: 'bg-sky-500', text: 'text-sky-700', soft: 'bg-sky-50' },
-  sustain: { label: 'Sound sustain', short: 'Sustain', hint: 'Free of stretched sounds', bar: 'bg-violet-500', text: 'text-violet-700', soft: 'bg-violet-50' },
+  accuracy: { label: 'Word accuracy', short: 'Accuracy', hint: 'Right words, in order', bar: 'bg-cyan-500', text: 'text-cyan-700', soft: 'bg-cyan-50' },
+  sustain: { label: 'Sound sustain', short: 'Sustain', hint: 'Free of stretched sounds', bar: 'bg-sky-500', text: 'text-sky-700', soft: 'bg-sky-50' },
 } as const;
 
 export type MetricKey = keyof typeof METRIC_STYLES;

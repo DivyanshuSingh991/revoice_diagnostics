@@ -71,7 +71,7 @@ function pitchTrack(pcm: Float32Array, fmin = 100, fmax = 700): PitchTrack {
   const rms = frameRms(pcm, win, HOP);
   const { noise } = levels(rms);
   const peakRms = percentile(rms, 0.98);
-  const energyGate = Math.max(noise * 3, peakRms * 0.1);
+  const energyGate = Math.max(noise * 1.5, peakRms * 0.04);
 
   const corr = new Float32Array(maxLag + 1);
   for (let f = 0; f < n; f++) {
@@ -99,7 +99,7 @@ function pitchTrack(pcm: Float32Array, fmin = 100, fmax = 700): PitchTrack {
     // Prefer the shortest lag close to the best peak, which avoids octave-down errors.
     let lagSel = minLag;
     for (let lag = minLag + 1; lag < maxLag; lag++) {
-      if (corr[lag] >= 0.9 * best && corr[lag] >= corr[lag - 1] && corr[lag] >= corr[lag + 1]) {
+      if (corr[lag] >= 0.85 * best && corr[lag] >= corr[lag - 1] && corr[lag] >= corr[lag + 1]) {
         lagSel = lag;
         break;
       }
@@ -112,7 +112,8 @@ function pitchTrack(pcm: Float32Array, fmin = 100, fmax = 700): PitchTrack {
     const lagExact = lagSel + Math.max(-0.5, Math.min(0.5, shift));
 
     r[f] = b;
-    if (b >= 0.5) {
+    // Sustained /a/ has strong periodicity; threshold 0.38 handles noisy mics/breathiness
+    if (b >= 0.38) {
       voiced[f] = 1;
       f0[f] = SR / lagExact;
     }
@@ -120,8 +121,8 @@ function pitchTrack(pcm: Float32Array, fmin = 100, fmax = 700): PitchTrack {
   return { f0, r, voiced };
 }
 
-/** Longest run of voiced frames, bridging gaps up to maxGapFrames. */
-function longestVoicedRun(voiced: Uint8Array, maxGapFrames = 20) {
+/** Longest run of voiced frames, bridging brief vocal fry or micro-gaps up to maxGapFrames (e.g. ~400ms). */
+function longestVoicedRun(voiced: Uint8Array, maxGapFrames = 40) {
   let bestStart = 0;
   let bestEnd = -1;
   let start = -1;
@@ -276,8 +277,9 @@ export function analyzeDdk(pcm: Float32Array): DdkMeasures {
   }
   const { noise, speech } = levels(env);
   const snrDb = Math.round(20 * Math.log10(speech / noise));
-  const thr = noise + 0.2 * (speech - noise);
-  const minDist = 7; // 70 ms → max ~14 syllables/s
+  // Responsive threshold so softer child consonant releases are not cut off
+  const thr = noise + 0.12 * (speech - noise);
+  const minDist = 6; // 60 ms → allows fast repetitions without missing syllables
 
   const peaks: number[] = [];
   for (let i = 1; i < env.length - 1; i++) {
@@ -289,23 +291,24 @@ export function analyzeDdk(pcm: Float32Array): DdkMeasures {
     }
     let valley = Infinity;
     for (let k = last; k <= i; k++) valley = Math.min(valley, env[k]);
-    const distinct = i - last >= minDist && valley < 0.6 * Math.min(env[last], env[i]);
+    // 0.72 valley dip ratio ensures soft syllable transitions in ta-ta-ta and ka-ka-ka are detected
+    const distinct = i - last >= minDist && valley < 0.72 * Math.min(env[last], env[i]);
     if (distinct) peaks.push(i);
     else if (env[i] > env[last]) peaks[peaks.length - 1] = i;
   }
 
-  if (peaks.length < 4) {
+  if (peaks.length < 3) {
     return { syllables: peaks.length, durationSec: 0, ratePerSec: 0, regularityCv: 0, snrDb };
   }
   const intervals = peaks.slice(1).map((p, i) => (p - peaks[i]) * HOP_SEC);
   const m = mean(intervals);
   const sd = Math.sqrt(mean(intervals.map((x) => (x - m) ** 2)));
-  const durationSec = (peaks[peaks.length - 1] - peaks[0]) * HOP_SEC;
+  const durationSec = Math.max(0.5, (peaks[peaks.length - 1] - peaks[0]) * HOP_SEC);
   return {
     syllables: peaks.length,
     durationSec: round1(durationSec),
     ratePerSec: round1((peaks.length - 1) / durationSec),
-    regularityCv: Math.round((sd / m) * 100) / 100,
+    regularityCv: Math.round((sd / (m || 1)) * 100) / 100,
     snrDb,
   };
 }

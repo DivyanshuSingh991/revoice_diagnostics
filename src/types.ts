@@ -79,9 +79,11 @@ export interface VoiceAttempt {
   audioFilename?: string;
 }
 
-/** Diadochokinetic task: AMR = "पा-पा-पा", SMR = "पा-टा-का". */
+/** Diadochokinetic task: AMR = "पा-पा-पा", "ता-ता-ता", "का-का-का"; SMR = "पा-टा-का". */
+export type DdkKind = 'amr' | 'ta' | 'ka' | 'smr';
+
 export interface DdkResult {
-  kind: 'amr' | 'smr';
+  kind: DdkKind;
   syllables: number;
   durationSec: number;
   ratePerSec: number;
@@ -107,8 +109,96 @@ export interface NamingItem {
 
 export interface ScreeningTasks {
   voice?: VoiceAttempt[];
-  ddk?: { amr?: DdkResult; smr?: DdkResult };
+  ddk?: { amr?: DdkResult; ta?: DdkResult; ka?: DdkResult; smr?: DdkResult };
   naming?: NamingItem[];
+  sameSound?: SameSoundChallengeResult;
+}
+
+// ---- Same Sound Challenge Types ----
+
+export interface SameSoundWord {
+  id: string;
+  hindi: string;
+  roman: string;
+  emoji: string;
+  english: string;
+}
+
+export interface SameSoundGroup {
+  sound: string;
+  romanSound: string;
+  soundLabel: string;
+  place: string;
+  manner: string;
+  words: SameSoundWord[];
+}
+
+export interface SoundErrorDetail {
+  sound: string;
+  type: 'substitution' | 'omission' | 'distortion';
+  position: 'initial' | 'medial' | 'final';
+  observed?: string;
+  description: string;
+}
+
+export interface SameSoundWordResult {
+  wordId: string;
+  targetWord: string;
+  targetRoman: string;
+  emoji: string;
+  spokenText: string;
+  isCorrect: boolean;
+  accuracyPct: number;
+  errors: SoundErrorDetail[];
+}
+
+export interface SameSoundRoundResult {
+  round: number; // 1, 2, or 3
+  targetSound: string;
+  targetWords: string[];
+  spokenTranscript: string;
+  durationMs: number;
+  speakingRateWpm: number;
+  pauseCount: number;
+  longestPauseMs: number;
+  accuracyPct: number;
+  wordsCorrect: number;
+  wordsIncorrect: number;
+  audioFilename?: string;
+  words: SameSoundWordResult[];
+  soundErrors: SoundErrorDetail[];
+}
+
+export interface SameSoundChallengeResult {
+  targetSound: string;
+  overallAccuracyPct: number;
+  totalWordsCorrect: number;
+  totalWordsIncorrect: number;
+  soundErrors: {
+    substitutions: number;
+    omissions: number;
+    distortions: number;
+  };
+  totalTimeTakenMs: number;
+  avgSpeakingRateWpm: number;
+  totalPauses: number;
+  consistencyScore: number; // 0 - 100
+  consistencyCategory: 'High' | 'Moderate' | 'Inconsistent';
+  rounds: SameSoundRoundResult[];
+  wordWisePerformance: {
+    targetWord: string;
+    emoji: string;
+    attempts: number;
+    correctAttempts: number;
+    avgAccuracyPct: number;
+  }[];
+  soundWisePerformance: {
+    sound: string;
+    substitutions: number;
+    omissions: number;
+    distortions: number;
+  }[];
+  clinicalNotes: string;
 }
 
 export type ScreeningStatus = 'typical' | 'monitor' | 'refer' | 'inconclusive' | 'not_tested';

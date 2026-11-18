@@ -123,14 +123,19 @@ export function isDegenerateTranscript(text: string, promptWordCount: number): b
     return tooLong && unique / words.length < 0.35;
 }
 
-export async function blobToFloat32Array(blob: Blob): Promise<Float32Array> {
+export async function blobToRawFloat32Array(blob: Blob, targetSampleRate = 16000): Promise<Float32Array> {
     const arrayBuffer = await blob.arrayBuffer();
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx: AudioContext = new AudioContextClass({ sampleRate: 16000 });
+    const ctx: AudioContext = new AudioContextClass({ sampleRate: targetSampleRate });
     try {
         const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        return trimSilence(audioBuffer.getChannelData(0), 16000);
+        return audioBuffer.getChannelData(0);
     } finally {
         ctx.close().catch(() => {});
     }
+}
+
+export async function blobToFloat32Array(blob: Blob): Promise<Float32Array> {
+    const raw = await blobToRawFloat32Array(blob, 16000);
+    return trimSilence(raw, 16000);
 }

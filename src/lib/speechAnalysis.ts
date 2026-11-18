@@ -224,7 +224,7 @@ export function generateDiagnosticReport(
     prolongation: prolongCount >= 2,
     // Measured directly from the sustained "आ" when available
     breathSustain: breathTested ? flagged('breath') : prolongCount >= 2,
-    articulation: omittedCount >= 2 || avgClarity < 70 || flagged('sounds'),
+    articulation: omittedCount >= 2 || avgClarity < 70 || flagged('sounds') || (tasks.sameSound ? tasks.sameSound.overallAccuracyPct < 75 : false),
   };
 
   let primaryIssue = 'Clear Natural Speech';

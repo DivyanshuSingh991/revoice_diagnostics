@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { blobToFloat32Array } from '../lib/whisper';
+import { blobToFloat32Array, blobToRawFloat32Array, trimSilence } from '../lib/whisper';
 import { pcmToWavBlob } from '../lib/wavEncoder';
 
 export interface CaptureResult {
   blob: Blob;
   pcm: Float32Array; // 16 kHz, silence-trimmed
+  rawPcm: Float32Array; // 16 kHz, untrimmed original recording
   durationMs: number;
   browserText: string;
 }
@@ -22,6 +23,7 @@ interface StartOptions {
 export function useAudioCapture() {
   const [status, setStatus] = useState<'idle' | 'recording' | 'processing'>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [liveVolume, setLiveVolume] = useState(0);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -31,10 +33,14 @@ export function useAudioCapture() {
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef('');
   const optionsRef = useRef<StartOptions | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number>();
 
   const clearTimers = () => {
     window.clearInterval(tickRef.current);
     window.clearTimeout(autoStopRef.current);
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
   };
 
   const stop = useCallback(() => {
@@ -46,6 +52,10 @@ export function useAudioCapture() {
         recognitionRef.current.stop();
       } catch (_) {}
       recognitionRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
     }
     setStatus('processing');
     recorder.stop();
@@ -88,6 +98,31 @@ export function useAudioCapture() {
 
       chunksRef.current = [];
       transcriptRef.current = '';
+
+      // Live volume analyser for playful animations (bird fly)
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const ctx = new AudioContextClass();
+        const source = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        audioContextRef.current = ctx;
+        analyserRef.current = analyser;
+
+        const pcmData = new Uint8Array(analyser.frequencyBinCount);
+        const updateVol = () => {
+          if (!analyserRef.current) return;
+          analyserRef.current.getByteFrequencyData(pcmData);
+          let sum = 0;
+          for (let i = 0; i < pcmData.length; i++) sum += pcmData[i];
+          const avg = sum / pcmData.length;
+          setLiveVolume(Math.min(1, Math.max(0, avg / 70)));
+          animFrameRef.current = requestAnimationFrame(updateVol);
+        };
+        updateVol();
+      } catch (_) {}
+
       const recorder = new MediaRecorder(stream);
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
@@ -97,13 +132,15 @@ export function useAudioCapture() {
         stream.getTracks().forEach((t) => t.stop());
         try {
           const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-          const pcm = await blobToFloat32Array(blob);
-          optionsRef.current?.onDone({ blob, pcm, durationMs, browserText: transcriptRef.current.trim() });
+          const rawPcm = await blobToRawFloat32Array(blob, 16000);
+          const pcm = trimSilence(rawPcm, 16000);
+          optionsRef.current?.onDone({ blob, pcm, rawPcm, durationMs, browserText: transcriptRef.current.trim() });
         } catch (err) {
           console.error('[capture] processing failed:', err);
           optionsRef.current?.onError?.(err);
         } finally {
           setStatus('idle');
+          setLiveVolume(0);
         }
       };
       recorderRef.current = recorder;
@@ -123,11 +160,12 @@ export function useAudioCapture() {
     () => () => {
       clearTimers();
       if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+      if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
     },
     []
   );
 
-  return { status, elapsedMs, start, stop };
+  return { status, elapsedMs, liveVolume, start, stop };
 }
 
 /** Saves a 16 kHz WAV next to the sentence recordings (same naming scheme). */

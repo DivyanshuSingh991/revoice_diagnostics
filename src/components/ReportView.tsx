@@ -11,11 +11,14 @@ import {
   HeartPulse,
   Download,
   ClipboardCheck,
-  Info
+  Info,
+  ArrowLeft,
+  Sparkles
 } from 'lucide-react';
 import { METRIC_STYLES, MetricMeter, ScoreRing, scoreTone, StatusPill, STATUS_STYLES } from './ui';
 import { OVERALL_LABEL, ageBand, bestVoiceAttempt, effectiveNaming, namingSummary, scoredNaming } from '../lib/screening';
 import { PICTURE_WORDS } from '../lib/articulation';
+import { PapayaIcon } from './PapayaIcon';
 
 const SEVERITY_TONES: Record<DiagnosticReport['coreDiagnosis']['severity'], { panel: string; icon: string; badge: string }> = {
   Optimal: { panel: 'bg-emerald-50/70 border-emerald-200', icon: 'bg-emerald-500 text-white', badge: 'bg-emerald-100 text-emerald-800' },
@@ -27,9 +30,10 @@ const SEVERITY_TONES: Record<DiagnosticReport['coreDiagnosis']['severity'], { pa
 interface Props {
   report: DiagnosticReport;
   onLogout: () => void;
+  onBackToRecord?: () => void;
 }
 
-export const ReportView: React.FC<Props> = ({ report, onLogout }) => {
+export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }) => {
   const { profile, coreDiagnosis, recommendations, sentences } = report;
 
   const handlePrint = () => {
@@ -70,6 +74,16 @@ export const ReportView: React.FC<Props> = ({ report, onLogout }) => {
         </div>
 
         <div className="flex items-center gap-2 print:hidden">
+          {onBackToRecord && (
+            <button
+              onClick={onBackToRecord}
+              className="btn-secondary h-11 px-4 text-sm text-slate-700 hover:text-brand-700 hover:border-brand-300 hover:bg-brand-50"
+              title="Return to record more sentences or redo exercises"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Recording
+            </button>
+          )}
           <button
             onClick={handlePrint}
             className="btn-primary h-11 px-4 text-sm"
@@ -309,10 +323,11 @@ export const ReportView: React.FC<Props> = ({ report, onLogout }) => {
 
 const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age: number }> = ({ tasks, age }) => {
   const voice = bestVoiceAttempt(tasks.voice);
-  const ddk = [tasks.ddk?.amr, tasks.ddk?.smr].filter((d): d is NonNullable<typeof d> => !!d);
+  const ddk = [tasks.ddk?.amr, tasks.ddk?.ta, tasks.ddk?.ka, tasks.ddk?.smr].filter((d): d is NonNullable<typeof d> => !!d);
   const naming = scoredNaming(tasks.naming);
   const summary = namingSummary(tasks.naming);
-  if (!voice && ddk.length === 0 && naming.length === 0) return null;
+  const sameSound = tasks.sameSound;
+  if (!voice && ddk.length === 0 && naming.length === 0 && !sameSound) return null;
 
   const cell = (label: string, value: React.ReactNode, hint?: string) => (
     <div>
@@ -330,13 +345,23 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
   return (
     <section className="grid md:grid-cols-2 gap-4">
       {voice && (
-        <div className="card p-5 print:shadow-none print:break-inside-avoid">
-          <h3 className="text-lg font-bold text-slate-900">🎈 Voice &amp; breath</h3>
-          <p className="text-xs text-slate-500 mb-4">Sustained “आ”, best of {tasks.voice?.length} tries</p>
+        <div className="card p-5 print:shadow-none print:break-inside-avoid space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
+                <span>🕊️ Bird Flight: Voice &amp; Breath Support</span>
+              </h3>
+              <p className="text-xs text-slate-500">Sustained “आ”, best of {tasks.voice?.length} attempts</p>
+            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+              Held {voice.mptSec}s (Target: ≥ {mptExp}s)
+            </span>
+          </div>
+
           <dl className="grid grid-cols-3 gap-3">
-            {cell('Held for', `${voice.mptSec} s`, `≥ ${mptExp}s normal`)}
-            {cell('Pitch', voice.f0Hz ? `${voice.f0Hz} Hz` : '—', `${pitchExp} normal`)}
-            {cell('HNR', val(voice.hnrDb, ' dB'), '≥ 12 dB normal')}
+            {cell('Held for (MPT)', `${voice.mptSec} s`, `≥ ${mptExp}s normal`)}
+            {cell('Pitch (F0)', voice.f0Hz ? `${voice.f0Hz} Hz` : '—', `${pitchExp} normal`)}
+            {cell('HNR', val(voice.hnrDb, ' dB'), '≥ 12 dB clean')}
             {cell('Jitter', val(voice.jitterPct, '%'), '≤ 1.5% normal')}
             {cell('Shimmer', val(voice.shimmerPct, '%'), '≤ 6% normal')}
             {cell('Noise (SNR)', `${voice.snrDb} dB`, '≥ 15 dB clean')}
@@ -349,12 +374,22 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
           <p className="text-xs text-slate-500 mb-4">Repeating syllables as fast as possible</p>
           <div className="space-y-3">
             {ddk.map((d) => {
-              const expectedRate = d.kind === 'amr'
+              const expectedRate = d.kind === 'amr' || d.kind === 'ta'
                 ? (band === '3–5' ? 3.0 : band === '6–8' ? 3.5 : 4.0)
+                : d.kind === 'ka'
+                ? (band === '3–5' ? 2.8 : band === '6–8' ? 3.3 : 3.8)
                 : (band === '3–5' ? 2.5 : band === '6–8' ? 3.0 : 3.5);
+              const label =
+                d.kind === 'amr'
+                  ? 'पा-पा-पा'
+                  : d.kind === 'ta'
+                  ? 'ता-ता-ता'
+                  : d.kind === 'ka'
+                  ? 'का-का-का'
+                  : 'पा-टा-का';
               return (
                 <dl key={d.kind} className="grid grid-cols-[6.5rem_1fr_1fr_1fr] gap-3 items-end">
-                  <span className="font-display text-lg font-bold text-slate-700">{d.kind === 'amr' ? 'पा-पा-पा' : 'पा-टा-का'}</span>
+                  <span className="font-display text-lg font-bold text-slate-700">{label}</span>
                   {cell('Rate', `${d.ratePerSec}/s`, `≥ ${expectedRate}/s normal`)}
                   {cell('Rhythm', d.regularityCv > 0.3 ? 'Uneven' : 'Even', `CV ${d.regularityCv} (≤ 0.30)`)}
                   {cell('Order', d.kind === 'smr' ? (d.sequenceCorrect === undefined ? '—' : d.sequenceCorrect ? 'Kept' : 'Mixed') : 'n/a', d.kind === 'smr' ? 'Sequence' : undefined)}
@@ -399,6 +434,115 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
               );
             })}
           </ul>
+        </div>
+      )}
+
+      {sameSound && sameSound.rounds.length > 0 && (
+        <div className="card p-5 md:col-span-2 print:shadow-none print:break-inside-avoid space-y-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-xs">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Same Sound Challenge · Target Sound '{sameSound.targetSound}'
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Target sound evaluated · {sameSound.totalWordsCorrect}/4 words correct ({sameSound.overallAccuracyPct}%)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Accuracy: {sameSound.overallAccuracyPct}%
+              </span>
+            </div>
+          </div>
+
+          {/* Key Calculated Parameters Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {cell('Pronunciation Accuracy', `${sameSound.overallAccuracyPct}%`, 'Overall speech sound match')}
+            {cell('Correct Words', `${sameSound.totalWordsCorrect}/4`, 'Words accurately pronounced')}
+            {cell('Incorrect Words', `${sameSound.totalWordsIncorrect}/4`, 'Words needing practice')}
+            {cell('Speaking Rate', `${sameSound.avgSpeakingRateWpm} WPM`, 'Words per minute')}
+            {cell('Time Taken', `${(sameSound.totalTimeTakenMs / 1000).toFixed(1)} s`, 'Total response time')}
+          </div>
+
+          {/* Sound Errors Breakdown: Substitution, Omission, Distortion */}
+          <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Sound Errors Classification (Substitutions · Omissions · Distortions)
+            </h4>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+                <span className="text-[11px] font-semibold text-amber-700 block">Substitutions</span>
+                <span className="font-display text-lg font-bold text-amber-800">{sameSound.soundErrors.substitutions}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+                <span className="text-[11px] font-semibold text-rose-700 block">Omissions</span>
+                <span className="font-display text-lg font-bold text-rose-800">{sameSound.soundErrors.omissions}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
+                <span className="text-[11px] font-semibold text-sky-700 block">Distortions</span>
+                <span className="font-display text-lg font-bold text-sky-800">{sameSound.soundErrors.distortions}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Word-wise Performance */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Word-Wise Performance</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {sameSound.wordWisePerformance.map((w, idx) => (
+                <div key={idx} className="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center gap-2">
+                  <span className="w-7 h-7 flex items-center justify-center select-none shrink-0">
+                    {w.targetWord === 'पपीता' ? <PapayaIcon className="w-7 h-7" /> : <span className="text-2xl">{w.emoji}</span>}
+                  </span>
+                  <div className="min-w-0">
+                    <span className="font-display text-sm font-bold text-slate-800 block truncate">{w.targetWord}</span>
+                    <span className="text-[11px] text-slate-500 block">
+                      {w.correctAttempts}/{w.attempts} correct ({w.avgAccuracyPct}%)
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Round-wise Breakdown */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Round-Wise Consistency Tracking</h4>
+            <div className="space-y-2">
+              {sameSound.rounds.map((r) => (
+                <div key={r.round} className="rounded-xl border border-slate-200 p-3 bg-white flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-200">
+                      Round {r.round}
+                    </span>
+                    <span className="font-medium text-slate-700">
+                      Words: <strong>{r.wordsCorrect}/4 Correct</strong> ({r.accuracyPct}%)
+                    </span>
+                    {r.audioFilename && (
+                      <span className="font-mono text-[10px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border">
+                        {r.audioFilename}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-slate-500 font-medium">
+                    <span>⏱️ {(r.durationMs / 1000).toFixed(1)}s</span>
+                    <span>🗣️ {r.speakingRateWpm} WPM</span>
+                    <span>⏸️ {r.pauseCount} pauses</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Clinical Interpretation & Age Notes */}
+          <div className="rounded-xl bg-amber-50/60 border border-amber-200/70 p-3 text-xs text-amber-900 leading-relaxed">
+            <strong>Clinical Articulation Screening Note:</strong> {sameSound.clinicalNotes}
+          </div>
         </div>
       )}
     </section>
