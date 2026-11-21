@@ -244,7 +244,7 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
 
         <ol className="space-y-3">
           {[
-            { icon: ClipboardList, title: 'Child Details', text: 'Register new child or select existing profile from cloud DB.' },
+            { icon: ClipboardList, title: 'Child Details', text: 'Register new child or select existing profile.' },
             { icon: Mic, title: 'Speech Tasks', text: 'Voice "आ", Pa-Ta-Ka rate, Picture Naming & 5 sentences.' },
             { icon: FileBarChart, title: 'Diagnostic Report', text: 'Clarity scores, clinical indicators & home intervention plan.' },
           ].map(({ icon: Icon, title, text }, i) => (
@@ -263,26 +263,6 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
           ))}
         </ol>
 
-        {/* Database Live Connectivity Card */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-              <Database className="w-3.5 h-3.5 text-blue-600" /> Supabase Cloud Database
-            </span>
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium ${
-              dbStatus === 'connected' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${dbStatus === 'connected' ? 'bg-emerald-600' : 'bg-amber-600 animate-pulse'}`} />
-              {dbStatus === 'connected' ? 'Connected' : 'Connecting...'}
-            </span>
-          </div>
-          <p className="text-slate-500">
-            {recentSpeakers.length > 0 
-              ? `${recentSpeakers.length} child profiles synchronized with cloud database.`
-              : 'Synchronizing profiles with cloud database...'}
-          </p>
-        </div>
-
         <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-sm text-amber-900 flex gap-3">
           <Lightbulb className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
           <p>
@@ -296,17 +276,13 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
         {/* Top Status & Tabs */}
         <div className="space-y-4 pb-5 mb-6 border-b border-slate-100">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="relative flex h-2.5 w-2.5">
-                {!modelReady && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>}
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${modelReady ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-              </span>
-              <span className="font-medium">{whisperStatus}</span>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              {activeTab === 'new' ? 'Child Registration' : 'Saved Records'}
             </div>
 
             {activeTab === 'new' && (
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-500">Assigned Speaker ID</span>
+                <span className="text-slate-500">Speaker ID</span>
                 <span className="font-mono font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-md flex items-center gap-1.5">
                   {loadingId ? <Loader2 className="w-3 h-3 animate-spin text-blue-600" /> : speakerId}
                 </span>
@@ -480,7 +456,7 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
                 <span className="font-semibold text-slate-800 flex items-center gap-1.5 mb-1">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" /> Parent / Guardian Consent
                 </span>
-                I confirm that I am the parent or authorized guardian and above 18 years of age. I consent to speech recording and clinical AI analysis for evaluating speech clarity diagnostics of my child. Data is stored securely in Supabase and used solely for research and clinical purposes.
+                I confirm that I am the parent or authorized guardian and above 18 years of age. I consent to speech recording and clinical AI analysis for evaluating speech clarity diagnostics of my child. Data is stored securely and used solely for research and clinical assessment.
               </div>
             </label>
 
@@ -552,7 +528,7 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
                 type="button"
                 onClick={loadDatabaseData}
                 disabled={isLoadingSpeakers}
-                title="Refresh from Supabase"
+                title="Refresh records"
                 className="px-3 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-600 transition flex items-center gap-1.5 text-xs font-medium"
               >
                 <RotateCw className={`w-4 h-4 ${isLoadingSpeakers ? 'animate-spin text-blue-600' : ''}`} />
@@ -564,7 +540,7 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
             {isLoadingSpeakers ? (
               <div className="text-center py-12 space-y-3">
                 <Loader2 className="w-7 h-7 text-blue-600 animate-spin mx-auto" />
-                <p className="text-sm text-slate-500">Fetching registered children from Supabase...</p>
+                <p className="text-sm text-slate-500">Loading registered children...</p>
               </div>
             ) : filteredSpeakers.length === 0 ? (
               <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
@@ -664,7 +640,7 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
             {isLoadingHistory ? (
               <div className="py-12 text-center space-y-2">
                 <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
-                <p className="text-xs text-slate-500">Loading diagnostic assessments from Supabase...</p>
+                <p className="text-xs text-slate-500">Loading diagnostic assessments...</p>
               </div>
             ) : speakerHistory.assessments.length === 0 ? (
               <div className="py-8 text-center bg-slate-50 rounded-2xl space-y-2">

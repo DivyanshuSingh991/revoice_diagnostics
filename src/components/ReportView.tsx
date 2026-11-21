@@ -69,7 +69,7 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
             Speech screening for {profile.name}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Acoustic clarity &amp; disfluency diagnostic · Whisper Devanagari (temperature 0)
+            Acoustic clarity &amp; disfluency diagnostic · Clinical Speech Clarity Protocol
           </p>
         </div>
 

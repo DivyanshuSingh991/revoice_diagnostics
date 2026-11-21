@@ -481,7 +481,7 @@ export const SentenceRecorder: React.FC<Props> = ({
             <>
               <div className="w-14 h-14 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
               <p className="mt-5 font-display text-lg font-semibold text-slate-800">Listening carefully…</p>
-              <p className="text-sm text-slate-500">Whisper is transcribing the Hindi speech and checking clarity</p>
+              <p className="text-sm text-slate-500">Processing Hindi speech audio and evaluating clarity…</p>
             </>
           )}
         </div>
@@ -509,7 +509,7 @@ export const SentenceRecorder: React.FC<Props> = ({
               <div className="flex items-center justify-between px-4 py-2.5">
                 <span className="eyebrow">Transcript</span>
                 <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                  Browser ASR + Whisper
+                  Speech Analysis
                 </span>
               </div>
               <div className="px-4 py-3 grid grid-cols-[4.5rem_1fr] gap-x-3 gap-y-2 items-baseline">

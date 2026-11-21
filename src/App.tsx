@@ -142,7 +142,6 @@ export function App() {
 
           <div className="flex items-center gap-2">
             <span
-              title={whisperStatus}
               className="hidden sm:inline-flex items-center gap-2 h-8 px-3 rounded-full bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600"
             >
               <span
@@ -150,7 +149,7 @@ export function App() {
                   modelState === 'ready' ? 'bg-emerald-500' : modelState === 'offline' ? 'bg-slate-400' : 'bg-amber-500 animate-pulse'
                 }`}
               />
-              {modelState === 'ready' ? 'AI ready' : modelState === 'offline' ? 'Basic mode' : downloadPct ? `Loading AI ${downloadPct}%` : 'Loading AI'}
+              {modelState === 'ready' ? 'System ready' : modelState === 'offline' ? 'Standard mode' : downloadPct ? `Loading ${downloadPct}%` : 'Loading...'}
             </span>
 
             {profile && (
