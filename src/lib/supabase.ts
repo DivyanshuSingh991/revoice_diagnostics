@@ -11,11 +11,17 @@ const SUPABASE_URL = (
   DEFAULT_SUPABASE_URL
 ).trim().replace(/\/+$/, '');
 
-const SUPABASE_ANON_KEY = (
+// Guard against accidentally truncated keys in Vercel environment settings
+const rawEnvKey = (
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  DEFAULT_SUPABASE_KEY
+  ''
 ).trim();
+
+// The verified valid Supabase key is 47 characters and ends with 'Bwm'
+export const SUPABASE_ANON_KEY = (rawEnvKey.length >= 45 && rawEnvKey.endsWith('Bwm'))
+  ? rawEnvKey
+  : DEFAULT_SUPABASE_KEY;
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 

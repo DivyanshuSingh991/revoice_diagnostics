@@ -194,15 +194,19 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
       // 1. Explicitly save to Supabase cloud database
       const saveRes = await saveSpeakerProfile(profile);
       if (saveRes.error) {
-        console.warn('[SignupConsent] Cloud save warning:', saveRes.error);
+        console.error('[SignupConsent] Cloud save error:', saveRes.error);
+        setError(`Database save warning: ${typeof saveRes.error === 'string' ? saveRes.error : JSON.stringify(saveRes.error)}`);
+        setIsSaving(false);
+        return;
       }
       
       // 2. Advance to the assessment station
       onComplete(profile);
     } catch (err: any) {
       console.error('[SignupConsent] Error saving profile:', err);
-      // Still allow proceeding so a temporary network glitch doesn't block the child's test
-      onComplete(profile);
+      setError(`Database Error: ${err?.message || err}. Please try again.`);
+      setIsSaving(false);
+      return;
     } finally {
       setIsSaving(false);
     }
@@ -481,10 +485,32 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
             </label>
 
             {error && (
-              <p role="alert" className="flex items-center gap-2 text-sm font-medium text-rose-700 bg-rose-50 px-4 py-3 rounded-xl border border-rose-200">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
-              </p>
+              <div role="alert" className="space-y-2 text-sm text-rose-700 bg-rose-50 p-4 rounded-xl border border-rose-200">
+                <p className="flex items-center gap-2 font-medium">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {error}
+                </p>
+                {error.includes('Database') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError('');
+                      onComplete({
+                        name: name.trim(),
+                        age: Number(age),
+                        gender,
+                        parentName: parentName.trim(),
+                        parentMobile: parentMobile.trim(),
+                        consent,
+                        speakerId: speakerId.trim().toUpperCase()
+                      });
+                    }}
+                    className="text-xs px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-semibold transition"
+                  >
+                    Proceed offline anyway &rarr;
+                  </button>
+                )}
+              </div>
             )}
 
             <button
