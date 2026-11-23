@@ -19,6 +19,7 @@ import { METRIC_STYLES, MetricMeter, ScoreRing, scoreTone, StatusPill, STATUS_ST
 import { OVERALL_LABEL, ageBand, bestVoiceAttempt, effectiveNaming, namingSummary, scoredNaming } from '../lib/screening';
 import { PICTURE_WORDS } from '../lib/articulation';
 import { PapayaIcon } from './PapayaIcon';
+import { ReVoiceLogo } from './ReVoiceLogo';
 
 const SEVERITY_TONES: Record<DiagnosticReport['coreDiagnosis']['severity'], { panel: string; icon: string; badge: string }> = {
   Optimal: { panel: 'bg-emerald-50/70 border-emerald-200', icon: 'bg-emerald-500 text-white', badge: 'bg-emerald-100 text-emerald-800' },
@@ -64,7 +65,7 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
       {/* Header & Actions */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-1">
         <div className="min-w-0">
-          <p className="eyebrow"><span className="text-[#3B82F6] font-bold">ReVoice</span> speech screening report</p>
+          <p className="eyebrow flex items-center gap-1.5"><ReVoiceLogo size="xs" showBadge={false} /> speech screening report</p>
           <h1 className="mt-1 text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
             Speech screening for {profile.name}
           </h1>

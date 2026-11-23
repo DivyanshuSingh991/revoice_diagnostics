@@ -6,7 +6,9 @@ import { saveSpeakerProfile, saveDiagnosticAssessment, saveScreeningResult } fro
 import { SignupConsent } from './components/SignupConsent';
 import { AssessmentStation } from './components/AssessmentStation';
 import { ReportView } from './components/ReportView';
-import { Check, LogOut } from 'lucide-react';
+import { ReVoiceLogo } from './components/ReVoiceLogo';
+import { CuteCloudStepper } from './components/CuteCloudStepper';
+import { LogOut } from 'lucide-react';
 
 const STORAGE_KEYS = {
   PROFILE: 'revoice_active_profile',
@@ -103,52 +105,46 @@ export function App() {
   const downloadPct = Number(whisperStatus.match(/(\d+)%/)?.[1] ?? 0);
 
   return (
-    <div className="min-h-screen bg-canvas text-slate-800 flex flex-col font-sans print:bg-white">
+    <div className={`min-h-screen text-slate-800 flex flex-col font-sans print:bg-white relative isolate ${report ? 'bg-canvas' : ''}`}>
+      {/* Landing page background with 50% opacity */}
+      {!profile && (
+        <div
+          className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-50 pointer-events-none"
+          style={{ backgroundImage: "url('/landing-bg.jpg?v=3')" }}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Second page (Assessment Station / Recording) background with 50% opacity */}
+      {profile && !report && (
+        <div
+          className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-50 pointer-events-none"
+          style={{ backgroundImage: "url('/assessment-bg.jpg?v=1')" }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Top Navbar */}
-      <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-30 print:hidden">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
-          <div className="min-w-0 leading-tight">
-            <span className="font-display font-bold text-xl text-[#3B82F6] tracking-tight">ReVoice</span>
-            <p className="text-[11px] text-slate-500 font-medium -mt-0.5">Child Speech Assessment</p>
+      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/70 sticky top-0 z-30 print:hidden">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-18 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="min-w-0 leading-tight shrink-0">
+            <ReVoiceLogo size="md" showBadge={false} />
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Child Speech Assessment</p>
           </div>
 
-          <ol className="hidden md:flex items-center gap-1 text-sm" aria-label="Progress">
-            {STEPS.map((label, i) => {
-              const n = i + 1;
-              const done = n < step;
-              const active = n === step;
-              return (
-                <li key={label} className="flex items-center gap-1">
-                  {i > 0 && <span className={`w-8 h-px ${done || active ? 'bg-brand-300' : 'bg-slate-200'}`} />}
-                  <span
-                    aria-current={active ? 'step' : undefined}
-                    className={`flex items-center gap-2 px-2.5 py-1 rounded-full font-medium ${
-                      active ? 'bg-brand-50 text-brand-700' : done ? 'text-slate-600' : 'text-slate-400'
-                    }`}
-                  >
-                    <span
-                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                        active ? 'bg-brand-600 text-white' : done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'
-                      }`}
-                    >
-                      {done ? <Check className="w-3 h-3" strokeWidth={3} /> : n}
-                    </span>
-                    {label}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+          {/* Illustrated 3-Step Progress Indicator (Teddy Bear, Record, Bunny) */}
+          <div className="flex items-center justify-center flex-1 max-w-xl lg:max-w-2xl mx-2 sm:mx-4">
+            <CuteCloudStepper currentStep={step} />
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <span
               title={whisperStatus}
               className="hidden sm:inline-flex items-center gap-2 h-8 px-3 rounded-full bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600"
             >
               <span
-                className={`w-2 h-2 rounded-full ${
-                  modelState === 'ready' ? 'bg-emerald-500' : modelState === 'offline' ? 'bg-slate-400' : 'bg-amber-500 animate-pulse'
-                }`}
+                className={`w-2 h-2 rounded-full ${modelState === 'ready' ? 'bg-emerald-500' : modelState === 'offline' ? 'bg-slate-400' : 'bg-amber-500 animate-pulse'
+                  }`}
               />
               {modelState === 'ready' ? 'AI ready' : modelState === 'offline' ? 'Basic mode' : downloadPct ? `Loading AI ${downloadPct}%` : 'Loading AI'}
             </span>
@@ -201,8 +197,9 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-xs text-slate-400 mt-auto print:hidden">
-        <span className="text-[#3B82F6] font-semibold">ReVoice</span> Pediatric Speech Assessment &copy; 2026 all rights reserved.
+      <footer className="text-center py-6 text-xs text-slate-400 mt-auto print:hidden flex items-center justify-center gap-1.5">
+        <ReVoiceLogo size="xs" showBadge={false} />
+        <span>Pediatric Speech Assessment &copy; 2026 all rights reserved.</span>
       </footer>
     </div>
   );
