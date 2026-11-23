@@ -105,7 +105,7 @@ export function App() {
   const downloadPct = Number(whisperStatus.match(/(\d+)%/)?.[1] ?? 0);
 
   return (
-    <div className={`min-h-screen text-slate-800 flex flex-col font-sans print:bg-white relative isolate ${report ? 'bg-canvas' : ''}`}>
+    <div className="min-h-screen text-slate-800 flex flex-col font-sans print:bg-white relative isolate">
       {/* Landing page background with 50% opacity */}
       {!profile && (
         <div
@@ -120,6 +120,15 @@ export function App() {
         <div
           className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-50 pointer-events-none"
           style={{ backgroundImage: "url('/assessment-bg.jpg?v=1')" }}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Third page (Report View) background with 50% opacity */}
+      {report && (
+        <div
+          className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-50 pointer-events-none print:hidden"
+          style={{ backgroundImage: "url('/landing-bg.jpg?v=3')" }}
           aria-hidden="true"
         />
       )}

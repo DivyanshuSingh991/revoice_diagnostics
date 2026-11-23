@@ -20,6 +20,7 @@ import { OVERALL_LABEL, ageBand, bestVoiceAttempt, effectiveNaming, namingSummar
 import { PICTURE_WORDS } from '../lib/articulation';
 import { PapayaIcon } from './PapayaIcon';
 import { ReVoiceLogo } from './ReVoiceLogo';
+import { RevoiceToyBlocks } from './FormDecorations';
 
 const SEVERITY_TONES: Record<DiagnosticReport['coreDiagnosis']['severity'], { panel: string; icon: string; badge: string }> = {
   Optimal: { panel: 'bg-emerald-50/70 border-emerald-200', icon: 'bg-emerald-500 text-white', badge: 'bg-emerald-100 text-emerald-800' },
@@ -61,55 +62,58 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
   ];
 
   return (
-    <article className="max-w-4xl mx-auto space-y-5 animate-fade-up print:space-y-4 print:animate-none">
+    <article className="max-w-4xl mx-auto space-y-6 animate-fade-up print:space-y-4 print:animate-none">
       {/* Header & Actions */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-1">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2">
         <div className="min-w-0">
-          <p className="eyebrow flex items-center gap-1.5"><ReVoiceLogo size="xs" showBadge={false} /> speech screening report</p>
-          <h1 className="mt-1 text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
-            Speech screening for {profile.name}
+          <div className="inline-flex items-center gap-2 bg-[#E0F2FE] border border-[#BAE6FD] px-3.5 py-1 rounded-full text-xs font-black text-[#0369A1] uppercase tracking-wider mb-2 shadow-2xs">
+            <ReVoiceLogo size="xs" showBadge={false} />
+            <span>Speech Screening Report</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-[#0F2744] tracking-tight leading-tight">
+            Speech screening for <span className="text-blue-600">{profile.name}</span>
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600 font-medium">
             Acoustic clarity &amp; disfluency diagnostic · Whisper Devanagari (temperature 0)
           </p>
         </div>
 
-        <div className="flex items-center gap-2 print:hidden">
+        <div className="flex flex-wrap items-center gap-2.5 print:hidden">
           {onBackToRecord && (
             <button
               onClick={onBackToRecord}
-              className="btn-secondary h-11 px-4 text-sm text-slate-700 hover:text-brand-700 hover:border-brand-300 hover:bg-brand-50"
+              className="py-3 px-5 rounded-full border-2 border-[#BAE6FD] bg-[#E0F2FE]/70 hover:bg-[#E0F2FE] text-[#0369A1] font-bold text-sm flex items-center gap-2 transition-all shadow-xs"
               title="Return to record more sentences or redo exercises"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Recording
+              <span>Back to Recording</span>
             </button>
           )}
           <button
             onClick={handlePrint}
-            className="btn-primary h-11 px-4 text-sm"
+            className="py-3 px-6 rounded-full bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] hover:from-[#1D4ED8] hover:to-[#172554] text-white font-extrabold text-sm shadow-[0_8px_20px_-4px_rgba(37,99,235,0.4)] border-2 border-dashed border-white/60 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
             title="Save as PDF or print paper report"
           >
             <Download className="w-4 h-4" />
-            Save as PDF / Print
+            <span>Save as PDF / Print</span>
           </button>
           <button
             onClick={onLogout}
-            className="btn-secondary h-11 px-4 text-sm hover:text-rose-700 hover:border-rose-200 hover:bg-rose-50"
+            className="py-3 px-5 rounded-full border-2 border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-700 font-bold text-sm flex items-center gap-2 transition-all shadow-xs"
             title="Log out and clear session"
           >
             <LogOut className="w-4 h-4" />
-            End session
+            <span>End session</span>
           </button>
         </div>
       </header>
 
       {/* Child & Parent Summary Meta */}
-      <dl className="card p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4 print:shadow-none">
+      <dl className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 md:p-7 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-5 gap-y-4 print:shadow-none print:border print:rounded-2xl">
         {meta.map((m) => (
           <div key={m.label} className="min-w-0">
-            <dt className="text-xs font-medium text-slate-400">{m.label}</dt>
-            <dd className={`mt-0.5 font-semibold text-slate-800 truncate ${m.mono ? 'font-mono text-[15px]' : ''}`}>
+            <dt className="text-xs font-bold uppercase tracking-wider text-slate-400">{m.label}</dt>
+            <dd className={`mt-1 font-bold text-slate-800 truncate ${m.mono ? 'font-mono text-sm text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg inline-block' : 'text-base font-extrabold text-[#0F2744]'}`}>
               {m.value}
             </dd>
           </div>
@@ -118,25 +122,25 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
 
       {/* Screening outcome per domain */}
       {report.screening && (
-        <section className="card overflow-hidden print:shadow-none print:break-inside-avoid">
-          <div className={`px-5 md:px-7 py-5 flex items-start gap-4 border-b ${STATUS_STYLES[report.screening.overall].pill}`}>
-            <ClipboardCheck className="w-6 h-6 shrink-0 mt-0.5" />
+        <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] overflow-hidden print:shadow-none print:border print:rounded-2xl print:break-inside-avoid">
+          <div className={`px-6 md:px-8 py-5 flex items-start gap-4 border-b-2 border-dashed border-slate-100 ${STATUS_STYLES[report.screening.overall].pill}`}>
+            <ClipboardCheck className="w-7 h-7 shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="eyebrow !text-current opacity-80">Screening outcome · age band {report.screening.ageBand}</p>
-              <h2 className="text-2xl font-bold leading-tight">{OVERALL_LABEL[report.screening.overall].title}</h2>
-              <p className="text-sm mt-0.5 opacity-90">{OVERALL_LABEL[report.screening.overall].action}</p>
+              <p className="eyebrow !text-current opacity-80 font-bold">Screening outcome · age band {report.screening.ageBand}</p>
+              <h2 className="text-2xl font-black leading-tight mt-0.5">{OVERALL_LABEL[report.screening.overall].title}</h2>
+              <p className="text-sm mt-1 opacity-90 font-medium">{OVERALL_LABEL[report.screening.overall].action}</p>
             </div>
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y-2 divide-dashed divide-slate-100">
             {report.screening.domains.map((d) => (
-              <li key={d.key} className="px-5 md:px-7 py-3.5 grid sm:grid-cols-[12rem_7.5rem_1fr] gap-x-4 gap-y-1 items-start">
-                <span className="font-semibold text-slate-800 text-sm">{d.label}</span>
+              <li key={d.key} className="px-6 md:px-8 py-4 grid sm:grid-cols-[12rem_7.5rem_1fr] gap-x-4 gap-y-1.5 items-start">
+                <span className="font-extrabold text-[#0F2744] text-sm">{d.label}</span>
                 <span>
                   <StatusPill status={d.status} />
                 </span>
-                <span className="text-sm text-slate-600 min-w-0">
-                  {d.measure !== '—' && <span className="block font-medium text-slate-800 tabular-nums">{d.measure}</span>}
-                  <span className="block text-xs text-slate-500">{d.note}</span>
+                <span className="text-sm text-slate-600 min-w-0 font-medium">
+                  {d.measure !== '—' && <span className="block font-bold text-slate-900 tabular-nums">{d.measure}</span>}
+                  <span className="block text-xs text-slate-500 mt-0.5">{d.note}</span>
                 </span>
               </li>
             ))}
@@ -145,15 +149,15 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
       )}
 
       {/* Overall Score Summary (Clarity, Repetition, Sustain) */}
-      <section className="card p-6 md:p-7 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10 items-center print:shadow-none print:break-inside-avoid">
+      <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 md:p-8 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10 items-center print:shadow-none print:border print:rounded-2xl print:break-inside-avoid">
         <div className="flex items-center gap-5">
           <ScoreRing score={report.overallScore} />
           <div>
-            <p className="eyebrow flex items-center gap-1.5">
-              <HeartPulse className="w-3.5 h-3.5" /> Overall clarity score
+            <p className="eyebrow flex items-center gap-1.5 font-bold">
+              <HeartPulse className="w-4 h-4 text-rose-500" /> Overall clarity score
             </p>
-            <p className={`font-display text-2xl font-bold mt-1 ${overallTone.text}`}>{overallTone.label}</p>
-            <p className="text-xs text-slate-500 mt-1 max-w-[13rem]">
+            <p className={`font-display text-2xl font-black mt-1 ${overallTone.text}`}>{overallTone.label}</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-[13rem] font-medium">
               Synthesized acoustic accuracy and phoneme precision
             </p>
           </div>
@@ -162,45 +166,45 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
           {report.avgAccuracy !== undefined && (
             <div>
               <MetricMeter metric="accuracy" value={report.avgAccuracy} compact />
-              <p className="text-xs text-slate-500 mt-1.5">Target words produced correctly, in order</p>
+              <p className="text-xs text-slate-500 mt-1.5 font-medium">Target words produced correctly, in order</p>
             </div>
           )}
           <div>
             <MetricMeter metric="repetition" value={report.avgRepetitionScore} compact />
-            <p className="text-xs text-slate-500 mt-1.5">Syllable-level consistency &amp; stutter detection</p>
+            <p className="text-xs text-slate-500 mt-1.5 font-medium">Syllable-level consistency &amp; stutter detection</p>
           </div>
           <div>
             <MetricMeter metric="sustain" value={report.avgProlongationScore} compact />
-            <p className="text-xs text-slate-500 mt-1.5">Breath sustain &amp; sound prolongation control</p>
+            <p className="text-xs text-slate-500 mt-1.5 font-medium">Breath sustain &amp; sound prolongation control</p>
           </div>
         </div>
       </section>
 
       {/* Core Diagnostic Section */}
-      <section className={`rounded-3xl border p-6 md:p-7 ${severityTone.panel} print:break-inside-avoid`}>
+      <section className={`rounded-[32px] sm:rounded-[36px] border-4 border-amber-300 bg-[#FFFDF5] shadow-[0_20px_50px_-12px_rgba(245,158,11,0.18)] p-6 md:p-8 print:shadow-none print:border print:rounded-2xl print:break-inside-avoid`}>
         <div className="flex items-start gap-4">
-          <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center ${severityTone.icon}`}>
-            {coreDiagnosis.severity === 'Optimal' ? <CheckCircle className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
+          <div className={`w-13 h-13 shrink-0 rounded-2xl flex items-center justify-center shadow-xs ${severityTone.icon}`}>
+            {coreDiagnosis.severity === 'Optimal' ? <CheckCircle className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <p className="eyebrow">Diagnostic finding</p>
-              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${severityTone.badge}`}>
+              <p className="eyebrow font-bold">Diagnostic finding</p>
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-2xs ${severityTone.badge}`}>
                 {coreDiagnosis.severity} degree
               </span>
             </div>
-            <h2 className="mt-1 text-2xl font-bold text-slate-900 leading-tight">{coreDiagnosis.primaryIssue}</h2>
-            <p className="mt-2 text-sm text-slate-700 leading-relaxed">{coreDiagnosis.description}</p>
+            <h2 className="mt-1 text-2xl font-black text-[#0F2744] leading-tight">{coreDiagnosis.primaryIssue}</h2>
+            <p className="mt-2 text-sm text-slate-700 leading-relaxed font-medium">{coreDiagnosis.description}</p>
           </div>
         </div>
 
         {/* Diagnostic Flags */}
-        <ul className="mt-5 grid sm:grid-cols-2 gap-2">
+        <ul className="mt-5 grid sm:grid-cols-2 gap-2.5">
           {flagItems.map((f) => (
             <li
               key={f.yes}
-              className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-white/80 border ${
-                f.on ? 'border-amber-300 text-amber-900' : 'border-white text-slate-600'
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-bold bg-white border-2 transition shadow-2xs ${
+                f.on ? 'border-amber-300 text-amber-900' : 'border-slate-200 text-slate-700'
               }`}
             >
               {f.on ? (
@@ -215,62 +219,62 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
       </section>
 
       {/* Detailed Per-Sentence Analysis */}
-      <section className="card overflow-hidden print:shadow-none">
-        <div className="px-5 md:px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-brand-600" />
+      <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] overflow-hidden print:shadow-none print:border print:rounded-2xl">
+        <div className="px-6 md:px-8 py-5 border-b-2 border-dashed border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-[#F0F9FF]/60">
+          <h3 className="text-xl font-black text-[#0F2744] flex items-center gap-2">
+            <Activity className="w-5 h-5 text-blue-600" />
             Per-sentence clarity breakdown
           </h3>
-          <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500">
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
             {(report.avgAccuracy !== undefined ? (['clarity', 'accuracy', 'repetition', 'sustain'] as const) : (['clarity', 'repetition', 'sustain'] as const)).map((k) => (
               <span key={k} className="flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${METRIC_STYLES[k].bar}`} />
+                <span className={`w-2.5 h-2.5 rounded-full ${METRIC_STYLES[k].bar}`} />
                 {METRIC_STYLES[k].label}
               </span>
             ))}
           </div>
         </div>
-        <ol className="divide-y divide-slate-100">
+        <ol className="divide-y-2 divide-dashed divide-slate-100">
           {sentences.map((s, idx) => (
-            <li key={s.sentenceId} className="px-5 md:px-6 py-4 grid md:grid-cols-[2rem_1fr_auto] gap-x-4 gap-y-3 print:break-inside-avoid">
-              <span className="hidden md:flex w-7 h-7 rounded-full bg-slate-100 text-slate-500 text-xs font-bold items-center justify-center">
+            <li key={s.sentenceId} className="px-6 md:px-8 py-5 grid md:grid-cols-[2.5rem_1fr_auto] gap-x-4 gap-y-3 print:break-inside-avoid">
+              <span className="hidden md:flex w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold items-center justify-center">
                 {idx + 1}
               </span>
               <div className="min-w-0">
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
                   <span className="md:hidden font-semibold text-slate-500 mr-1">#{idx + 1}</span>
-                  Target: <span className="font-display text-sm">{s.targetSentence}</span>
+                  Target: <span className="font-display text-sm text-slate-600">{s.targetSentence}</span>
                 </p>
-                <p className="font-display text-lg font-bold text-slate-900 leading-snug mt-0.5">{s.spokenWhisperText}</p>
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <p className="font-display text-xl font-black text-[#0F2744] leading-snug mt-1">{s.spokenWhisperText}</p>
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   {s.detectedIssues.length > 0 ? (
                     s.detectedIssues.map((iss, i) => (
-                      <span key={i} className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                      <span key={i} className="text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300">
                         {iss}
                       </span>
                     ))
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                      <CheckCircle className="w-3 h-3" /> Clear &amp; Accurate
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Clear &amp; Accurate
                     </span>
                   )}
                   {s.audioFilename && (
-                    <span className="text-[10px] font-mono text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                    <span className="text-[11px] font-mono font-bold text-[#0369A1] bg-[#E0F2FE] px-2.5 py-0.5 rounded-lg border border-[#BAE6FD]">
                       {s.audioFilename}
                     </span>
                   )}
                 </div>
               </div>
-              <div className={`grid gap-2 self-center ${s.accuracyPct !== undefined ? 'grid-cols-4 md:w-80' : 'grid-cols-3 md:w-60'}`}>
+              <div className={`grid gap-2 self-center ${s.accuracyPct !== undefined ? 'grid-cols-4 md:w-84' : 'grid-cols-3 md:w-64'}`}>
                 {([
                   ['clarity', s.clarityPct],
                   ...(s.accuracyPct !== undefined ? [['accuracy', s.accuracyPct] as const] : []),
                   ['repetition', s.repetitionPct],
                   ['sustain', s.prolongationPct],
                 ] as const).map(([k, v]) => (
-                  <div key={k} className={`rounded-xl px-2 py-1.5 text-center ${METRIC_STYLES[k].soft}`}>
-                    <span className={`block font-display text-lg font-bold tabular-nums leading-tight ${METRIC_STYLES[k].text}`}>{v}%</span>
-                    <span className="block text-[10px] font-medium text-slate-500">{METRIC_STYLES[k].short}</span>
+                  <div key={k} className={`rounded-2xl px-2.5 py-2 text-center border ${METRIC_STYLES[k].soft}`}>
+                    <span className={`block font-display text-xl font-black tabular-nums leading-tight ${METRIC_STYLES[k].text}`}>{v}%</span>
+                    <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{METRIC_STYLES[k].short}</span>
                   </div>
                 ))}
               </div>
@@ -283,27 +287,27 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
 
       {/* Clinical Guidance: How Child Can Speak More Clearly */}
       <section>
-        <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-          <Lightbulb className="w-4 h-4 text-amber-500" />
+        <h3 className="text-xl font-black text-[#0F2744] mb-3 flex items-center gap-2">
+          <Lightbulb className="w-5 h-5 text-amber-500" />
           Targeted speech therapy &amp; home intervention plan
         </h3>
-        <div className={`grid grid-cols-1 gap-4 ${recommendations.length > 1 ? 'md:grid-cols-2' : ''}`}>
+        <div className={`grid grid-cols-1 gap-5 ${recommendations.length > 1 ? 'md:grid-cols-2' : ''}`}>
           {recommendations.map((rec, i) => (
-            <div key={i} className="card p-5 print:shadow-none print:break-inside-avoid">
+            <div key={i} className="rounded-[32px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 print:shadow-none print:border print:rounded-2xl print:break-inside-avoid">
               <div className="flex items-start gap-3">
-                <span className="w-8 h-8 shrink-0 rounded-xl bg-brand-50 text-brand-700 font-display font-bold flex items-center justify-center">
+                <span className="w-9 h-9 shrink-0 rounded-2xl bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] font-display font-black text-base flex items-center justify-center shadow-2xs">
                   {i + 1}
                 </span>
                 <div>
-                  <h4 className="font-bold text-slate-900 leading-snug">{rec.title}</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-1">{rec.advice}</p>
+                  <h4 className="font-extrabold text-[#0F2744] text-base leading-snug">{rec.title}</h4>
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed mt-1">{rec.advice}</p>
                 </div>
               </div>
-              <p className="eyebrow mt-4 mb-2">Recommended home drills</p>
+              <p className="eyebrow mt-4 mb-2 font-bold text-[#0369A1]">Recommended home drills</p>
               <ul className="space-y-2">
                 {rec.activities.map((act, actIdx) => (
-                  <li key={actIdx} className="flex gap-2.5 text-sm text-slate-700 bg-slate-50 p-3 rounded-xl">
-                    <Check className="w-4 h-4 shrink-0 text-brand-500 mt-0.5" strokeWidth={2.5} />
+                  <li key={actIdx} className="flex gap-2.5 text-sm text-slate-700 font-medium bg-[#F8FAFC] border border-slate-200/80 p-3 rounded-2xl shadow-2xs">
+                    <Check className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" strokeWidth={3} />
                     {act}
                   </li>
                 ))}
@@ -313,7 +317,12 @@ export const ReportView: React.FC<Props> = ({ report, onLogout, onBackToRecord }
         </div>
       </section>
 
-      <p className="flex gap-2 text-xs text-slate-500 leading-relaxed border-t border-slate-200 pt-4">
+      {/* Decorative corner blocks spelling REVOICE */}
+      <div className="pt-2 flex justify-center print:hidden">
+        <RevoiceToyBlocks className="w-40 h-24 drop-shadow-md" />
+      </div>
+
+      <p className="flex gap-2 text-xs text-slate-500 leading-relaxed border-t-2 border-dashed border-slate-200 pt-4">
         <Info className="w-4 h-4 shrink-0 text-slate-400" />
         This is an automated screening, not a diagnosis. Results depend on recording quality and use provisional cut-offs.
         Only a qualified speech-language pathologist can diagnose a speech or language disorder.
@@ -344,17 +353,17 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
   const pitchExp = band === '3–5' ? '250–350 Hz' : band === '6–8' ? '220–300 Hz' : '190–260 Hz';
 
   return (
-    <section className="grid md:grid-cols-2 gap-4">
+    <section className="grid md:grid-cols-2 gap-5">
       {voice && (
-        <div className="card p-5 print:shadow-none print:break-inside-avoid space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div className="rounded-[32px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 print:shadow-none print:border print:rounded-2xl print:break-inside-avoid space-y-3">
+          <div className="flex items-center justify-between border-b-2 border-dashed border-slate-100 pb-3">
             <div>
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
+              <h3 className="text-lg font-black text-[#0F2744] flex items-center gap-1.5">
                 <span>🕊️ Bird Flight: Voice &amp; Breath Support</span>
               </h3>
-              <p className="text-xs text-slate-500">Sustained “आ”, best of {tasks.voice?.length} attempts</p>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">Sustained “आ”, best of {tasks.voice?.length} attempts</p>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs">
               Held {voice.mptSec}s (Target: ≥ {mptExp}s)
             </span>
           </div>
@@ -370,9 +379,9 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
         </div>
       )}
       {ddk.length > 0 && (
-        <div className="card p-5 print:shadow-none print:break-inside-avoid">
-          <h3 className="text-lg font-bold text-slate-900">🚂 Speech motor</h3>
-          <p className="text-xs text-slate-500 mb-4">Repeating syllables as fast as possible</p>
+        <div className="rounded-[32px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 print:shadow-none print:border print:rounded-2xl print:break-inside-avoid">
+          <h3 className="text-lg font-black text-[#0F2744]">🚂 Speech motor</h3>
+          <p className="text-xs text-slate-500 font-medium mb-4">Repeating syllables as fast as possible</p>
           <div className="space-y-3">
             {ddk.map((d) => {
               const expectedRate = d.kind === 'amr' || d.kind === 'ta'
@@ -401,32 +410,32 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
         </div>
       )}
       {naming.length > 0 && (
-        <div className="card p-5 md:col-span-2 print:shadow-none print:break-inside-avoid">
+        <div className="rounded-[32px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 md:col-span-2 print:shadow-none print:border print:rounded-2xl print:break-inside-avoid">
           <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">🖼️ Speech sounds — picture naming</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-lg font-black text-[#0F2744]">🖼️ Speech sounds — picture naming</h3>
+              <p className="text-xs text-slate-500 font-medium">
                 {summary.items} pictures · {summary.wordsCorrect} named with all sounds correct · PCC {summary.pcc}%
               </p>
             </div>
             {summary.soundsToWatch.length > 0 && (
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 font-medium">
                 Sounds to watch:{' '}
                 <span className="font-display font-bold text-rose-700">{summary.soundsToWatch.join(', ')}</span>
               </p>
             )}
           </div>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {naming.map((it) => {
               const e = effectiveNaming(it);
               const ok = e.correct === it.consonantsTotal;
               const pic = PICTURE_WORDS.find((w) => w.id === it.id);
               return (
-                <li key={it.id} className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 ${ok ? 'border-slate-200' : 'border-rose-200 bg-rose-50/50'}`}>
+                <li key={it.id} className={`flex items-center gap-2 rounded-2xl border-2 px-3 py-2.5 ${ok ? 'border-slate-200 bg-white' : 'border-rose-200 bg-rose-50/70'}`}>
                   <span className="text-xl" aria-hidden>{pic?.emoji}</span>
                   <span className="min-w-0">
                     <span className="block font-display text-sm font-bold text-slate-800 truncate">{it.target}</span>
-                    <span className={`block text-[11px] truncate ${ok ? 'text-emerald-700' : 'text-rose-700'}`}>
+                    <span className={`block text-[11px] font-bold truncate ${ok ? 'text-emerald-700' : 'text-rose-700'}`}>
                       {ok ? 'Correct' : `Heard: ${it.heard}`}
                       {it.examinerOverride && ' · examiner'}
                     </span>
@@ -439,23 +448,23 @@ const TaskDetails: React.FC<{ tasks: NonNullable<DiagnosticReport['tasks']>; age
       )}
 
       {sameSound && sameSound.rounds.length > 0 && (
-        <div className="card p-5 md:col-span-2 print:shadow-none print:break-inside-avoid space-y-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="rounded-[32px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 md:col-span-2 print:shadow-none print:border print:rounded-2xl print:break-inside-avoid space-y-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b-2 border-dashed border-slate-100 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-xs">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <span className="w-7 h-7 rounded-xl bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] flex items-center justify-center text-xs shadow-2xs">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
                 </span>
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-black text-[#0F2744]">
                   Same Sound Challenge · Target Sound '{sameSound.targetSound}'
                 </h3>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
                 Target sound evaluated · {sameSound.totalWordsCorrect}/4 words correct ({sameSound.overallAccuracyPct}%)
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
                 Accuracy: {sameSound.overallAccuracyPct}%
               </span>
             </div>

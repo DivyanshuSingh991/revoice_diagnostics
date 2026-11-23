@@ -23,6 +23,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { MetricMeter } from './ui';
+import { RevoiceToyBlocks } from './FormDecorations';
 
 interface Props {
   sentences: SentenceItem[];
@@ -403,6 +404,11 @@ export const SentenceRecorder: React.FC<Props> = ({
           <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 justify-center">
             <Download className="w-3.5 h-3.5 text-blue-500" /> Each recording downloads automatically as WAV
           </p>
+        </div>
+
+        {/* Disarranged stacked blocks in corner */}
+        <div className="pt-1 flex justify-center">
+          <RevoiceToyBlocks className="w-32 h-20 drop-shadow-sm opacity-95" />
         </div>
       </aside>
 

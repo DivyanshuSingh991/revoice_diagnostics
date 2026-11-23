@@ -217,3 +217,92 @@ export const GrassDaisies: React.FC<{ className?: string }> = ({ className = 'w-
     </g>
   </svg>
 );
+
+// Disarranged 3D Toy Building Blocks spelling "REVOICE" in corner
+export const RevoiceToyBlocks: React.FC<{ className?: string }> = ({ className = 'w-40 h-24' }) => (
+  <div className={`pointer-events-none select-none ${className}`} aria-hidden="true">
+    <svg viewBox="0 0 160 92" className="w-full h-full overflow-visible drop-shadow-sm">
+      {/* Ground contact shadow */}
+      <ellipse cx="78" cy="84" rx="72" ry="7" fill="rgba(15, 23, 42, 0.12)" />
+
+      {/* BOTTOM ROW BLOCKS: O, I, C, E */}
+      {/* Block O (Mint Green) */}
+      <g transform="translate(4, 48) rotate(6 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.12)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#6EE7B7" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#047857" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#10B981" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.7)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>O</text>
+      </g>
+
+      {/* Block I (Lilac Purple) */}
+      <g transform="translate(42, 52) rotate(-5 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.12)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#C4B5FD" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#6D28D9" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#8B5CF6" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.7)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>I</text>
+      </g>
+
+      {/* Block C (Tangerine Orange) */}
+      <g transform="translate(80, 47) rotate(5 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.12)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#FDBA74" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#C2410C" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#F97316" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.7)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>C</text>
+      </g>
+
+      {/* Block E2 (Bubblegum Pink) */}
+      <g transform="translate(118, 50) rotate(-7 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.12)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#F472B6" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#BE185D" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#EC4899" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.7)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>E</text>
+      </g>
+
+      {/* TOP ROW BLOCKS: R, E, V (Disarranged on top of bottom row) */}
+      {/* Block R (Strawberry Red) */}
+      <g transform="translate(22, 12) rotate(-8 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.18)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#FCA5A5" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#B91C1C" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#EF4444" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.7)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>R</text>
+      </g>
+
+      {/* Block E1 (Sunny Yellow) */}
+      <g transform="translate(60, 8) rotate(6 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.18)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#FDE68A" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#B45309" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#F59E0B" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.8)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#78350F" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.5))' }}>E</text>
+      </g>
+
+      {/* Block V (Cyan Sky-Blue) */}
+      <g transform="translate(98, 11) rotate(-5 16 17)">
+        <rect x="3" y="8" width="32" height="30" rx="6" fill="rgba(15,23,42,0.18)" />
+        <path d="M 3 5 L 9 -1 L 39 -1 L 32 5 Z" fill="#7DD3FC" />
+        <path d="M 32 5 L 39 -1 L 39 27 L 32 33 Z" fill="#0369A1" />
+        <rect x="0" y="5" width="32" height="28" rx="5" fill="#0EA5E9" />
+        <rect x="3.5" y="8.5" width="25" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" />
+        <circle cx="6" cy="11" r="1.5" fill="rgba(255,255,255,0.7)" />
+        <text x="16" y="25" fontFamily="'Fredoka', 'Sniglet', 'Baloo 2', cursive, sans-serif" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>V</text>
+      </g>
+    </svg>
+  </div>
+);

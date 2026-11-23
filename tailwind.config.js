@@ -20,8 +20,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', '"Baloo 2"', '"Noto Sans Devanagari"', 'system-ui', 'sans-serif'],
-        display: ['"Baloo 2"', 'Inter', '"Noto Sans Devanagari"', 'system-ui', 'sans-serif'],
+        sans: ['"Baloo 2"', 'Fredoka', 'Inter', '"Noto Sans Devanagari"', 'system-ui', 'sans-serif'],
+        display: ['"Fredoka"', '"Baloo 2"', 'Inter', '"Noto Sans Devanagari"', 'system-ui', 'sans-serif'],
+        childish: ['"Fredoka"', '"Sniglet"', '"Baloo 2"', 'cursive', 'sans-serif'],
       },
       boxShadow: {
         card: '0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.06)',

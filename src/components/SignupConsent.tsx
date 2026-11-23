@@ -40,7 +40,7 @@ import {
   CuteRainbow,
   SparkleRays,
   ConsentTeddyBear,
-  StackedBooks,
+  RevoiceToyBlocks,
   GrassDaisies,
 } from './FormDecorations';
 
@@ -634,9 +634,9 @@ export const SignupConsent: React.FC<Props> = ({ onComplete, whisperStatus }) =>
             </div>
           )}
 
-          {/* Bottom decorative elements (Stacked Books on bottom left, Grass & Daisies on bottom right) */}
-          <div className="absolute -bottom-5 -left-3 pointer-events-none select-none z-10">
-            <StackedBooks className="w-14 h-11 sm:w-16 sm:h-12 drop-shadow-sm" />
+          {/* Bottom decorative elements: Disarranged Stacked Toy Blocks spelling REVOICE on bottom-left, Grass & Daisies on bottom-right */}
+          <div className="absolute -bottom-8 -left-5 pointer-events-none select-none z-10">
+            <RevoiceToyBlocks className="w-36 h-22 sm:w-44 sm:h-26 drop-shadow-md" />
           </div>
           <div className="absolute -bottom-6 -right-3 pointer-events-none select-none z-10">
             <GrassDaisies className="w-16 h-12 sm:w-20 sm:h-14 drop-shadow-sm" />
