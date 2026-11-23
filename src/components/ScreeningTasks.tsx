@@ -176,7 +176,7 @@ export const VoiceTask: React.FC<{
     : 10;
 
   return (
-    <section className="card overflow-hidden">
+    <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] overflow-hidden">
       <TaskHeader
         emoji="🕊️"
         eyebrow="Voice & breath support · Sustained Phonation"
@@ -447,7 +447,7 @@ export const DdkTask: React.FC<{
   ddk: ScreeningTasks['ddk'];
   update: Updater<NonNullable<ScreeningTasks['ddk']>>;
 }> = ({ speakerId, age, ddk = {}, update }) => (
-  <section className="card overflow-hidden">
+  <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] overflow-hidden">
     <TaskHeader emoji="🚂" eyebrow="Speech motor &amp; Articulation Speed · Diadochokinesis" title="Syllable Train: Pa-Ta-Ka (2×2)">
       Say each sound as <strong>fast and clearly</strong> as possible over and over until the 6-second timer ends. Tap Listen to hear an
       example first. Measures oral-motor coordination across lips, tongue tip, back of tongue, and sequence transitions.
@@ -522,7 +522,7 @@ export const NamingTask: React.FC<{
   const next = PICTURE_WORDS.find((w) => w.id > word.id && !items.some((i) => i.id === w.id)) ?? PICTURE_WORDS.find((w) => !items.some((i) => i.id === w.id));
 
   return (
-    <section className="card overflow-hidden">
+    <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] overflow-hidden">
       <TaskHeader
         emoji="🖼️"
         eyebrow="Speech sounds · Picture naming"

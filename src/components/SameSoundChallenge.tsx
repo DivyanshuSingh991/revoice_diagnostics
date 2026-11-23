@@ -105,7 +105,7 @@ export const SameSoundTask: React.FC<Props> = ({ speakerId, age, whisperReady, r
   const roundData = result && result.rounds.length > 0 ? result.rounds[0] : null;
 
   return (
-    <section className="card overflow-hidden">
+    <section className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 px-5 md:px-8 pt-6 pb-4 border-b border-slate-100">
         <div>

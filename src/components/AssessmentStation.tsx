@@ -46,9 +46,10 @@ export const AssessmentStation: React.FC<Props> = ({ sentences, onGenerateReport
   ];
 
   return (
-    <div className="space-y-5 animate-fade-up">
-      <div className="card p-3 md:p-4 flex flex-col lg:flex-row lg:items-center gap-3">
-        <nav aria-label="Screening tasks" className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1">
+    <div className="space-y-6 animate-fade-up">
+      {/* Top Task Navigation Bar */}
+      <div className="rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-3.5 sm:p-4.5 flex flex-col lg:flex-row lg:items-center gap-3.5">
+        <nav aria-label="Screening tasks" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1">
           {tabs.map((t) => {
             const isActive = active === t.key;
             return (
@@ -56,31 +57,41 @@ export const AssessmentStation: React.FC<Props> = ({ sentences, onGenerateReport
                 key={t.key}
                 onClick={() => setActive(t.key)}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex items-center gap-3 p-2.5 rounded-2xl border text-left transition ${
-                  isActive ? 'border-brand-300 bg-brand-50 ring-1 ring-brand-300' : 'border-transparent hover:bg-slate-50'
+                className={`flex items-center gap-3 p-3 rounded-2xl border-2 text-left transition-all ${
+                  isActive
+                    ? 'border-[#7DD3FC] bg-gradient-to-r from-[#E0F2FE] via-[#EDE9FE] to-[#E0F2FE] text-[#0369A1] shadow-sm'
+                    : 'border-transparent bg-slate-50/80 text-slate-600 hover:text-slate-900 hover:bg-slate-100/90'
                 }`}
               >
                 <span
-                  className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${
-                    t.done ? 'bg-emerald-500 text-white' : isActive ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-500'
+                  className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all ${
+                    t.done
+                      ? 'bg-emerald-500 text-white shadow-xs'
+                      : isActive
+                      ? 'bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-500'
                   }`}
                 >
-                  {t.done ? <Check className="w-4 h-4" strokeWidth={3} /> : <t.icon className="w-[18px] h-[18px]" />}
+                  {t.done ? <Check className="w-5 h-5" strokeWidth={3} /> : <t.icon className="w-5 h-5" />}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-slate-800 truncate">{t.label}</span>
-                  <span className="block text-[11px] text-slate-500 truncate">
-                    {t.area} · <span className="tabular-nums">{t.progress}</span>
+                  <span className="block text-sm font-extrabold text-[#0F2744] truncate">{t.label}</span>
+                  <span className="block text-[11px] font-semibold text-slate-500 truncate">
+                    {t.area} · <span className="tabular-nums font-bold text-blue-600">{t.progress}</span>
                   </span>
                 </span>
               </button>
             );
           })}
         </nav>
-        <div className="flex items-center lg:pl-3 lg:border-l border-slate-100 shrink-0">
-          <button onClick={() => generate()} className="btn-primary h-11 px-4 text-sm shrink-0">
+        <div className="flex items-center lg:pl-3 lg:border-l-2 lg:border-dashed lg:border-[#BAE6FD] shrink-0">
+          <button
+            onClick={() => generate()}
+            className="w-full lg:w-auto py-3 px-5 rounded-full bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] hover:from-[#1D4ED8] hover:to-[#172554] text-white font-extrabold text-sm shadow-[0_8px_20px_-4px_rgba(37,99,235,0.4)] transition-all flex items-center justify-center gap-2 border-2 border-dashed border-white/60 hover:scale-[1.02] active:scale-[0.98] shrink-0"
+          >
             <FileText className="w-4 h-4" />
-            Generate report
+            <span>Generate report</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
           </button>
         </div>
       </div>

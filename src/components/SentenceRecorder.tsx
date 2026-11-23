@@ -18,7 +18,9 @@ import {
   Lock,
   ArrowRight,
   Activity,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles,
+  Lightbulb
 } from 'lucide-react';
 import { MetricMeter } from './ui';
 
@@ -294,33 +296,41 @@ export const SentenceRecorder: React.FC<Props> = ({
   const progressPct = Math.round((completedCount / sentences.length) * 100);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[19rem_minmax(0,1fr)] gap-5 lg:gap-6 items-start animate-fade-up">
+    <div className="grid grid-cols-1 lg:grid-cols-[19.5rem_minmax(0,1fr)] gap-5 lg:gap-6 items-start animate-fade-up">
       {/* Sidebar: child, progress, sentence list, report */}
-      <aside className="min-w-0 card p-4 md:p-5 lg:sticky lg:top-24 space-y-5">
+      <aside className="min-w-0 rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-5 md:p-6 lg:sticky lg:top-24 space-y-5">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl" aria-hidden>
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 border-2 border-amber-300 flex items-center justify-center text-2xl shadow-xs" aria-hidden>
             🐰
           </div>
           <div className="min-w-0">
-            <p className="eyebrow">Practice station</p>
-            <p className="font-display text-lg font-bold text-slate-900 truncate leading-tight">{childName}</p>
-            <p className="font-mono text-[11px] font-semibold text-brand-700">{speakerId.toUpperCase()}</p>
+            <div className="inline-flex items-center gap-1 bg-[#E0F2FE] border border-[#BAE6FD] px-2.5 py-0.5 rounded-full text-[10px] font-black text-[#0369A1] uppercase tracking-wider mb-0.5">
+              Practice station
+            </div>
+            <p className="font-display text-lg font-extrabold text-[#0F2744] truncate leading-tight">{childName}</p>
+            <p className="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-flex items-center gap-1 mt-0.5">
+              {speakerId.toUpperCase()}
+            </p>
           </div>
         </div>
 
         <div>
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="font-medium text-slate-600">Recorded</span>
-            <span className="font-semibold text-slate-800 tabular-nums">{completedCount} of {sentences.length}</span>
+          <div className="flex items-center justify-between text-xs mb-1.5 font-bold">
+            <span className="text-slate-600">Recorded</span>
+            <span className="text-[#0369A1] bg-[#E0F2FE] px-2.5 py-0.5 rounded-full font-mono font-bold tabular-nums">
+              {completedCount} of {sentences.length}
+            </span>
           </div>
-          <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-            <div className="h-full rounded-full bg-emerald-500 transition-[width] duration-500" style={{ width: `${progressPct}%` }} />
+          <div className="h-3 rounded-full bg-[#E0F2FE] border border-[#BAE6FD]/70 overflow-hidden p-0.5">
+            <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-[width] duration-500 shadow-xs" style={{ width: `${progressPct}%` }} />
           </div>
         </div>
 
         {/* All 5 sentences, any order */}
         <nav aria-label="Sentences">
-          <p className="eyebrow mb-2 hidden lg:block">Choose any sentence</p>
+          <p className="text-xs font-black text-[#0369A1] uppercase tracking-wider mb-2.5 hidden lg:flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Choose any sentence
+          </p>
           <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible -mx-1 px-1 pb-1 lg:pb-0">
             {sentences.map((s) => {
               const isCompleted = !!evaluationsMap[s.id];
@@ -337,28 +347,30 @@ export const SentenceRecorder: React.FC<Props> = ({
                     setSelectedSentenceId(s.id);
                     setRecentEval(evalData || null);
                   }}
-                  className={`shrink-0 lg:w-full flex items-center gap-2 lg:gap-3 p-1.5 lg:p-3 rounded-2xl border text-left transition ${
+                  className={`shrink-0 lg:w-full flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-2xl border-2 text-left transition-all ${
                     isCurrent
-                      ? 'border-brand-300 bg-brand-50 ring-1 ring-brand-300'
-                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-[#38BDF8] bg-gradient-to-r from-[#E0F2FE] via-[#EDE9FE]/50 to-[#E0F2FE] shadow-sm'
+                      : isCompleted
+                      ? 'border-[#86EFAC] bg-[#F0FDF4] hover:bg-[#DCFCE7]/70'
+                      : 'border-slate-200 bg-white hover:border-[#BAE6FD] hover:bg-blue-50/30'
                   }`}
                 >
                   <span
-                    className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-sm font-bold ${
+                    className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-sm font-bold shadow-xs ${
                       isCompleted
                         ? 'bg-emerald-500 text-white'
                         : isCurrent
-                        ? 'bg-brand-600 text-white'
+                        ? 'bg-gradient-to-br from-[#0284C7] to-[#2563EB] text-white'
                         : 'bg-slate-100 text-slate-500'
                     }`}
                   >
                     {isCompleted ? <Check className="w-4 h-4" strokeWidth={3} /> : s.id}
                   </span>
                   <span className={`min-w-0 flex-1 ${isCompleted ? '' : 'hidden lg:block'}`}>
-                    <span className="hidden lg:block font-display text-[15px] font-semibold text-slate-800 truncate">
+                    <span className="hidden lg:block font-display text-[15px] font-bold text-[#0F2744] truncate">
                       {s.hindi}
                     </span>
-                    <span className={`block text-xs truncate ${isCompleted ? 'text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                    <span className={`block text-xs truncate font-medium ${isCompleted ? 'text-emerald-700 font-bold' : 'text-slate-500'}`}>
                       {isCompleted ? (
                         <>
                           {evalData.clarityPct}%<span className="hidden lg:inline"> clarity</span>
@@ -373,75 +385,83 @@ export const SentenceRecorder: React.FC<Props> = ({
         </nav>
 
         {/* Generate Report Button visible whenever at least 1 sentence has been spoken */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
+        <div className="pt-4 border-t-2 border-dashed border-[#BAE6FD] space-y-2.5">
           {completedCount >= 1 ? (
-            <button onClick={handleGenerateReportClick} className="btn-primary w-full h-12">
+            <button
+              onClick={handleGenerateReportClick}
+              className="w-full py-3.5 px-4 rounded-full bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] hover:from-[#1D4ED8] hover:to-[#172554] text-white font-extrabold text-sm shadow-[0_8px_20px_-4px_rgba(37,99,235,0.4)] transition-all flex items-center justify-center gap-2 border-2 border-dashed border-white/60 hover:scale-[1.01] active:scale-[0.99]"
+            >
               <FileText className="w-4 h-4" />
-              Generate Diagnosis Report
+              <span>Generate Diagnosis Report</span>
             </button>
           ) : (
-            <p className="text-xs text-slate-500 bg-slate-50 border border-dashed border-slate-200 rounded-xl px-3 py-2.5 flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-              Record any 1 sentence to unlock the report
-            </p>
+            <div className="bg-[#FFFDF5] border-2 border-dashed border-[#FCD34D] rounded-2xl p-3 text-xs text-amber-900 font-medium flex items-center gap-2 shadow-2xs">
+              <Lock className="w-4 h-4 shrink-0 text-amber-500" />
+              <span>Record any 1 sentence to unlock the report</span>
+            </div>
           )}
-          <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-            <Download className="w-3 h-3" /> Each recording downloads automatically as WAV
+          <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 justify-center">
+            <Download className="w-3.5 h-3.5 text-blue-500" /> Each recording downloads automatically as WAV
           </p>
         </div>
       </aside>
 
       {/* Active Sentence Practice Card */}
-      <section className="min-w-0 card overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-5 md:px-8 pt-5 md:pt-6">
-          <span className="eyebrow">
-            Sentence {currentSentence.id} <span className="text-slate-300">of {sentences.length}</span>
-          </span>
+      <section className="min-w-0 rounded-[32px] sm:rounded-[36px] border-4 border-[#BAE6FD] bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-12px_rgba(56,189,248,0.22)] p-6 md:p-8 space-y-6 relative overflow-visible">
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-2 bg-[#E0F2FE] border-2 border-[#BAE6FD] px-4 py-1.5 rounded-full shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-xs font-black tracking-wider text-[#0369A1] uppercase">
+              Sentence {currentSentence.id} <span className="text-[#0284C7]/60">of {sentences.length}</span>
+            </span>
+          </div>
           <button
             onClick={() => playTTSPrompt(currentSentence.hindi)}
-            className="btn-secondary h-9 px-3.5 text-sm rounded-full"
+            className="px-4 py-2 rounded-full border-2 border-[#BAE6FD] bg-[#E0F2FE]/70 hover:bg-[#E0F2FE] text-[#0369A1] font-bold text-xs flex items-center gap-2 transition-all shadow-2xs hover:scale-105 active:scale-95"
           >
-            <Volume2 className="w-4 h-4 text-brand-600" />
-            Listen
+            <Volume2 className="w-4 h-4 text-[#0284C7]" />
+            <span>Listen</span>
           </button>
         </div>
 
         {/* Large Sentence Display */}
-        <div className="px-5 md:px-10 pt-6 pb-8 text-center">
-          <h2 className="text-3xl md:text-[2.6rem] font-bold text-slate-900 leading-snug">
+        <div className="pt-2 pb-2 text-center">
+          <h2 className="text-3xl md:text-[2.65rem] font-black text-[#0F2744] leading-snug tracking-tight">
             {currentSentence.hindi}
           </h2>
-          <p className="mt-2 text-base md:text-lg text-slate-500">
+          <p className="mt-2 text-base md:text-xl font-bold text-slate-500">
             {currentSentence.roman}
           </p>
-          <p className="mt-3 text-xs text-slate-400">
-            Can’t read yet? Tap <strong className="font-semibold text-slate-500">Listen</strong> and let the child repeat the sentence.
-          </p>
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFFBEB] border border-amber-200/80 text-xs text-amber-900 font-medium shadow-2xs">
+            <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>Can’t read yet? Tap <strong className="font-extrabold text-[#451A03]">Listen</strong> and let the child repeat the sentence.</span>
+          </div>
         </div>
 
         {/* Mic Recording Button Area */}
-        <div className="mx-4 md:mx-8 mb-6 rounded-3xl bg-gradient-to-b from-slate-50 to-white border border-slate-100 py-8 px-4 flex flex-col items-center text-center min-h-[15rem] justify-center">
+        <div className="rounded-3xl bg-gradient-to-b from-[#F0F9FF]/90 via-white to-[#F0F9FF]/60 border-2 border-dashed border-[#BAE6FD] py-8 px-4 flex flex-col items-center text-center min-h-[16rem] justify-center relative shadow-inner">
           {!isRecording && !isProcessing && (
             <>
               <button
                 disabled={!whisperReady}
                 onClick={startRecording}
                 aria-label="Record"
-                className={`w-28 h-28 rounded-full flex flex-col items-center justify-center text-white transition duration-200 active:scale-95 ${
+                className={`w-30 h-30 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center text-white transition-all duration-200 active:scale-95 ${
                   whisperReady
-                    ? 'bg-brand-600 hover:bg-brand-700 hover:scale-105 shadow-lift'
+                    ? 'bg-gradient-to-b from-[#38BDF8] via-[#2563EB] to-[#1D4ED8] hover:from-[#60A5FA] hover:to-[#1E40AF] shadow-[0_14px_30px_-6px_rgba(37,99,235,0.45)] border-3 border-dashed border-white/70 hover:scale-105'
                     : 'bg-slate-300 cursor-not-allowed'
                 }`}
               >
-                <Mic className="w-11 h-11" />
-                <span className="text-[11px] font-bold mt-1 uppercase tracking-wider">Record</span>
+                <Mic className="w-12 h-12 text-white drop-shadow-sm" />
+                <span className="text-[11px] font-black mt-1 uppercase tracking-wider">Record</span>
               </button>
-              <p className="mt-5 font-display text-lg font-semibold text-slate-800">
+              <p className="mt-5 text-lg font-extrabold text-[#0F2744]">
                 {whisperReady ? 'Tap to Speak Sentence' : 'AI Model Initializing...'}
               </p>
-              <p className="mt-1 text-xs text-slate-500 flex items-center gap-1.5">
+              <p className="mt-1 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
                 Saves as
-                <code className="font-mono font-semibold text-slate-700 bg-white px-1.5 py-0.5 rounded-md border border-slate-200">
+                <code className="font-mono font-bold text-[#0369A1] bg-[#E0F2FE] border border-[#BAE6FD] px-2.5 py-0.5 rounded-lg text-xs">
                   {getAudioFileName(currentSentence.id)}
                 </code>
               </p>
@@ -456,22 +476,22 @@ export const SentenceRecorder: React.FC<Props> = ({
                 <button
                   onClick={stopRecording}
                   aria-label="Stop"
-                  className="relative w-28 h-28 rounded-full bg-rose-600 text-white flex flex-col items-center justify-center shadow-xl shadow-rose-600/30 hover:bg-rose-700 active:scale-95 transition"
+                  className="relative w-30 h-30 sm:w-32 sm:h-32 rounded-full bg-gradient-to-b from-[#FB7185] to-[#E11D48] text-white flex flex-col items-center justify-center shadow-[0_14px_30px_-6px_rgba(225,29,72,0.45)] border-3 border-dashed border-white/80 hover:bg-rose-700 active:scale-95 transition"
                 >
-                  <Square className="w-9 h-9 fill-current" />
-                  <span className="text-[11px] font-bold mt-1 uppercase tracking-wider">Stop</span>
+                  <Square className="w-10 h-10 fill-current" />
+                  <span className="text-[11px] font-black mt-1 uppercase tracking-wider">Stop</span>
                 </button>
               </div>
-              <div className="mt-6 flex items-end gap-1 h-6" aria-hidden>
+              <div className="mt-6 flex items-end gap-1.5 h-7" aria-hidden>
                 {[0, 0.15, 0.3, 0.1, 0.25, 0.05, 0.2].map((d, i) => (
                   <span
                     key={i}
-                    className="w-1.5 h-full rounded-full bg-rose-400 origin-bottom motion-safe:animate-level"
+                    className="w-1.5 h-full rounded-full bg-rose-500 origin-bottom motion-safe:animate-level"
                     style={{ animationDelay: `${d}s` }}
                   />
                 ))}
               </div>
-              <p className="mt-3 font-display text-lg font-semibold text-rose-600">
+              <p className="mt-4 text-lg font-extrabold text-rose-600 animate-pulse">
                 Child is speaking… tap Stop when finished
               </p>
             </>
@@ -479,53 +499,53 @@ export const SentenceRecorder: React.FC<Props> = ({
 
           {isProcessing && (
             <>
-              <div className="w-14 h-14 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
-              <p className="mt-5 font-display text-lg font-semibold text-slate-800">Listening carefully…</p>
-              <p className="text-sm text-slate-500">Whisper is transcribing the Hindi speech and checking clarity</p>
+              <div className="w-14 h-14 border-4 border-[#BAE6FD] border-t-[#0284C7] rounded-full animate-spin"></div>
+              <p className="mt-5 text-lg font-extrabold text-[#0F2744]">Listening carefully…</p>
+              <p className="text-sm font-medium text-slate-500">Whisper is transcribing the Hindi speech and checking clarity</p>
             </>
           )}
         </div>
 
         {/* Child Friendly Cheer & Results */}
         {recentEval && (
-          <div className="border-t border-slate-100 bg-slate-50/50 px-4 md:px-8 py-6 space-y-5 animate-fade-up">
+          <div className="border-t-2 border-dashed border-[#BAE6FD] bg-[#F8FAFC]/60 rounded-3xl p-5 md:p-6 space-y-5 animate-fade-up">
             {/* Encouraging Cartoon Toast */}
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-amber-100 to-orange-50 border border-amber-200/70">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/80 flex items-center justify-center text-3xl motion-safe:animate-bounce">
+            <div className="flex items-center gap-4 p-4 rounded-3xl bg-gradient-to-r from-amber-100 via-[#FEF3C7] to-amber-50 border-2 border-amber-300 shadow-sm">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/90 flex items-center justify-center text-3xl motion-safe:animate-bounce shadow-xs">
                 {cheerMsg.emoji}
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-amber-900 text-lg leading-tight">{cheerMsg.title}</h4>
-                <p className="text-sm text-amber-800">{cheerMsg.phrase}</p>
+                <h4 className="font-extrabold text-amber-950 text-lg leading-tight">{cheerMsg.title}</h4>
+                <p className="text-sm text-amber-900 font-medium">{cheerMsg.phrase}</p>
               </div>
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold text-amber-900 bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
-                <Download className="w-3 h-3" />
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#0369A1] bg-white px-3 py-1 rounded-full border border-blue-200 shadow-2xs">
+                <Download className="w-3.5 h-3.5 text-blue-500" />
                 {recentEval.audioFilename || getAudioFileName(currentSentence.id)}
               </span>
             </div>
 
-            {/* Target vs what the child said (Clean Devanagari Hindi STT) */}
-            <div className="rounded-2xl bg-white border border-slate-200/80 divide-y divide-slate-100">
-              <div className="flex items-center justify-between px-4 py-2.5">
-                <span className="eyebrow">Transcript</span>
-                <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+            {/* Target vs what the child said */}
+            <div className="rounded-3xl bg-white border-2 border-[#DDD6FE] divide-y-2 divide-dashed divide-slate-100 shadow-2xs overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#F5F3FF] to-white">
+                <span className="text-xs font-black text-indigo-900 uppercase tracking-wider">Transcript</span>
+                <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-0.5 rounded-full">
                   Browser ASR + Whisper
                 </span>
               </div>
-              <div className="px-4 py-3 grid grid-cols-[4.5rem_1fr] gap-x-3 gap-y-2 items-baseline">
-                <span className="text-xs font-medium text-slate-400">Target</span>
-                <p className="font-display text-lg text-slate-500 leading-snug">{recentEval.targetSentence}</p>
-                <span className="text-xs font-medium text-slate-400">Heard</span>
-                <p className="font-display text-xl font-bold text-slate-900 leading-snug">{recentEval.spokenWhisperText}</p>
+              <div className="px-5 py-4 grid grid-cols-[4.5rem_1fr] gap-x-3 gap-y-2.5 items-baseline">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Target</span>
+                <p className="text-lg text-slate-600 font-bold leading-snug">{recentEval.targetSentence}</p>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Heard</span>
+                <p className="text-xl font-black text-[#0F2744] leading-snug">{recentEval.spokenWhisperText}</p>
               </div>
               {recentEval.detectedIssues.length > 0 && (
-                <div className="px-4 py-3 flex flex-wrap gap-1.5">
+                <div className="px-5 py-3 flex flex-wrap gap-2 bg-[#FFFBEB]/60">
                   {recentEval.detectedIssues.map((issue, idx) => (
                     <span
                       key={idx}
-                      className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5"
+                      className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100/80 text-amber-900 border border-amber-300 flex items-center gap-1.5"
                     >
-                      <Activity className="w-3.5 h-3.5 text-amber-500" />
+                      <Activity className="w-3.5 h-3.5 text-amber-600" />
                       {issue}
                     </span>
                   ))}
@@ -545,16 +565,16 @@ export const SentenceRecorder: React.FC<Props> = ({
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
                 {recentEval.longestPauseMs !== undefined && (
                   <span>
-                    Longest pause <strong className="text-slate-700 tabular-nums">{(recentEval.longestPauseMs / 1000).toFixed(1)} s</strong>
+                    Longest pause <strong className="text-slate-700 tabular-nums font-bold">{(recentEval.longestPauseMs / 1000).toFixed(1)} s</strong>
                   </span>
                 )}
                 {recentEval.missedWords && recentEval.missedWords.length > 0 && (
                   <span>
-                    Missed or changed: <strong className="font-display text-sm text-slate-700">{recentEval.missedWords.join(', ')}</strong>
+                    Missed or changed: <strong className="font-display text-sm text-slate-700 font-bold">{recentEval.missedWords.join(', ')}</strong>
                   </span>
                 )}
                 {recentEval.snrDb !== undefined && recentEval.snrDb < 15 && (
-                  <span className="flex items-center gap-1 font-medium text-amber-800">
+                  <span className="flex items-center gap-1 font-bold text-amber-800">
                     <AlertTriangle className="w-3.5 h-3.5" /> Noisy recording ({recentEval.snrDb} dB) — try a quieter spot
                   </span>
                 )}
@@ -562,10 +582,13 @@ export const SentenceRecorder: React.FC<Props> = ({
             )}
 
             {/* Quick Actions */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={startRecording} className="btn-secondary h-12 px-5 flex-1">
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              <button
+                onClick={startRecording}
+                className="py-3 px-5 rounded-full border-2 border-[#BAE6FD] bg-[#E0F2FE]/70 hover:bg-[#E0F2FE] text-[#0369A1] font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xs flex-1"
+              >
                 <RotateCcw className="w-4 h-4" />
-                Try again
+                <span>Try again</span>
               </button>
 
               {currentSentence.id < sentences.length && (
@@ -574,19 +597,19 @@ export const SentenceRecorder: React.FC<Props> = ({
                     setSelectedSentenceId(currentSentence.id + 1);
                     setRecentEval(evaluationsMap[currentSentence.id + 1] || null);
                   }}
-                  className="btn-primary h-12 px-5 flex-1"
+                  className="py-3 px-5 rounded-full bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] hover:from-[#1D4ED8] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-[0_8px_20px_-4px_rgba(37,99,235,0.4)] border-2 border-dashed border-white/60 transition-all flex-1"
                 >
-                  Next sentence
+                  <span>Next sentence</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
 
               <button
                 onClick={handleGenerateReportClick}
-                className="btn h-12 px-5 flex-1 bg-slate-900 text-white hover:bg-slate-800"
+                className="py-3 px-5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md border-2 border-dashed border-white/60 transition-all flex-1"
               >
                 <FileText className="w-4 h-4" />
-                Generate report
+                <span>Generate report</span>
               </button>
             </div>
           </div>
